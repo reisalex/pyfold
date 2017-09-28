@@ -1,0 +1,6 @@
+FIX LOG
+
+pnuc - where does it get created/allocated?
+
+Check indexing in:
+loop_init
