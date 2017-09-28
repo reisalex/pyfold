@@ -99,4 +99,4 @@ def LOOP_INIT(rna):
     for i in range(0,nl):
         rna.LOOP_REAC(i)
 
-    return rna
+    return

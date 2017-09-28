@@ -2,17 +2,17 @@
 Module: RNAVAR
 
 Description: Contains the variables, work arrays, and parameters needed for computing
-			 the kinetics of folding for an RNA molecule. 
+             the kinetics of folding for an RNA molecule. 
 
 History:
-Version		Date			Comment
---------    -------     	--------------------
-			09/28/2017		Original Code
+Version     Date            Comment
+--------    -------         --------------------
+            09/28/2017      Original Code
 
 Dependencies:
 
 Author(s): Alex Reis
-		   Copyright (c) 2017 (Please refer to LICENCE)
+           Copyright (c) 2017 (Please refer to LICENCE)
 """
 
 # Allocatable arrays
