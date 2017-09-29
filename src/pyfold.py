@@ -118,8 +118,8 @@ def PYFOLD(seq,fld_start=None,fld_stop=None,nsim=1,tmax=1.0):
                 if ibpf == rna.ibsp:
 
                     # Write or whatever
-                    return 1
+                    return 
 
-    return 1
+    return
 
 

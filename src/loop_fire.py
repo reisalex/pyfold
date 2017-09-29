@@ -313,15 +313,445 @@ def LOOP_FIRE(rna,indx,amax):
 
             #=== Helix Retraction ===#
 
-            
+            icase = 0
 
+            if ( ip != n and jp != 1 ):
+
+                if ( rna.ibsp[ip+1] == jp-1 ):
+
+                    icase = 1
+
+                    if ( iloop == 1 ) and ( k == ke ):
+                        icase = 2
+                    #endif
+
+                elif ( iloop == 0 or k != ke ):
+
+                    l = rna.link[ip]
+                    mh = rna.nhlx[l]
+                    ms = rna.nsgl[l]
+
+                    icase = 3
+
+                #endif
+            #endif
+
+            if ( icase > 0 ):
+
+                if ( icase == 2 ):
+                    atot += rna.wrk1[ip]
+                else:
+                    atot += rna.wrk1[jp]
+                #endif
+
+                if ( atot >= amax ):
+
+                    rna.ibsp[ip] = 0
+                    rna.ibsp[jp] = 0
+
+                    if ( icase == 1 ):
+
+                        rna.nsgl[indx] = ns + 2
+
+                        rna.link[jp-1] = rna.link[jp]
+                        if ( jp != n ): rna.link[jp] = 0
+
+                        # Recalc main loop
+
+                        rna.LOOP_REAC(indx)
+
+                        # Recalc upper/lower loops?
+
+                        jndx = rna.link[ip+1]
+
+                        if ( iloop == 0 ): kndx = 0
+                        if ( iloop == 1 ): kndx = rna.link[j]
+
+                        if ( jndx == 0 ): rna.HELX_REAC(ip+1)
+                        if ( jndx != 0 ): rna.LOOP_REAC(jndx)
+                        if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                    elif ( icase == 2 ):
+
+                        rna.nsgl[indx] = ns + 2
+                        rna.loop[indx] = jp - 1
+
+                        rna.link[jp-1] = rna.link[jp]
+                        if ( jp != n ): rna.link[jp] = 0
+
+                        # Recalc main loop
+
+                        rna.LOOP_REAC(indx)
+
+                        # Recalc lower loop?
+
+                        kndx = rna.link[ip+1]
+
+                        if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                    elif ( icase == 3 ):
+
+                        rna.nhlx[indx] = nh + mh - 2
+                        rna.nsgl[indx] = ns + ms + 2
+
+                        jndx = rna.link[ip]
+
+                        # Fix links in loop being deleted
+
+                        l = ip + 1
+
+                        while ( l < jp ):
+
+                            if ( rna.link[l] == jndx ):
+                                l = rna.ibsp[l]
+                            else:
+                                l += 1
+                            #endif
+                        #endwhile
+
+                        # Copy loop nl to jndx
+
+                        if ( jndx != nl ):
+
+                            rna.loop[jndx] = rna.loop[nl]
+                            rna.nhlx[jndx] = rna.nhlx[nl]
+                            rna.nsgl[jndx] = rna.nsgl[nl]
+                            rna.ptot[jndx] = rna.ptot[nl]
+
+                            rna.LOOP_RESUM(jndx)
+
+                            kp = rna.loop[nl]
+
+                            rna.link[kp] = jndx
+
+                            l = kp + 1
+
+                            while ( l < rna.ibsp[kp] ):
+
+                                if ( rna.link[l] == nl ):
+                                    rna.link[l] = jndx
+                                #endif
+
+                                if ( rna.ibsp[l] > l ):
+                                    l = rna.ibsp[l]
+                                else:
+                                    l += 1
+                                #endif
+
+                            #endwhile
+                        #endif
+
+                        if ( indx != nl ): jndx = indx
+
+                        rna.link[ip] = 0
+                        if ( jp != n ): rna.link[jp] = 0
+
+                        rna.loop[nl] = 0
+                        rna.nhlx[nl] = 0
+                        rna.nsgl[nl] = 0
+                        rna.ptot[nl] = 0.0e0
+
+                        rna.LOOP_RESUM(nl)
+
+                        rna.nl -= 1
+
+                        if ( nsum > 2 ) and ( rna.nl <= nsum / 2):
+                            nsum = nsum / 2
+                            rna.nsum = nsum
+                            rna.psum[nsum] = 0.0e0
+                        #endif
+
+                        # Recalc main loop
+
+                        rna.LOOP_REAC(jndx)
+
+                        # Recalc lower loop?
+
+                        if ( iloop == 0 ): kndx = 0
+                        if ( iloop == 1 ): kndx = rna.link[j]
+
+                        if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                    #endif
+
+                    return
+
+                #endif
+            #endif
+
+            icase = 0
 
             #=== Helix Morphing ===#
 
+            if ( iloop == 0 or nh > 2 ) and (ip > 1 and jp < n):
+
+                hs = rna.iseq[ip-1]
+                js = rna.iseq[jp+1]
+
+                if ( iwc[hs][js] == 1 ): icase = 1
+
+                hs = rna.ibsp[ip-1]
+                js = rna.ibsp[jp+1]
+
+                if ( hs != 0 ) and ( rna.link[hs] != 0 ): icase = 0
+
+                if (js != 0 ) and (rna.link[jp+1] != 0 ): icase = 0
+
+                if ( hs == 0 and js == 0 ): icase = 0
+
+            #endif
+
+            if ( icase > 0 ):
+
+                dg = DELTAG_HM(rna,ip,jp,dg)
+
+                dg = dg / 2.0e0
+
+                x = beta * dg
+                x = math.exp(-x) * ratem
+
+                atot += x
+
+                if ( atot >= amax ):
+
+                    hs = rna.ibsp[ip-1]
+                    js = rna.ibsp[jp+1]
+
+                    if ( hs != 0 ):
+
+                        rna.ibsp[hs]   = 0
+                        rna.link[ip-1] = 0
+                        rna.link[ip-2] = indx
+
+                        if ( iloop == 1 and hs == ke ):
+                            rna.loop[indx] = ip - 2
+                        #endif
+                    #endif
+
+                    if ( js != 0 ):
+
+                        rna.ibsp[js] = 0
+                        rna.link[js] = 0
+                        rna.link[js-1] = indx
+
+                        if ( iloop == 1 and js == i ):
+                            rna.loop[indx] = js - 1
+                        #endif
+                    #endif
+
+                    if ( hs != 0 and js != 0 ):
+                        
+                        ns += 2
+                        rna.nsgl[indx] = ns
+                    #endif
+
+                    # Adjust base pairs
+
+                    rna.ibsp[ip-1] = jp+1
+                    rna.ibsp[jp+1] = ip-1
+
+                    # Fix links
+
+                    rna.link[jp+1] = rna.link[jp]
+                    rna.link[jp] = 0
+
+                    if ( iloop == 1 and k = ke ):
+                        rna.loop[indx] = jp + 1
+                    #endif
+
+                    # Recalc main loop
+
+                    rna.LOOP_REAC(indx)
+
+                    jndx = rna.link[ip]
+                    if ( jndx == 0 ): rna.HELX_REAC(ip)
+                    if ( indx != 0 ): rna.LOOP_REAC(jndx)
+
+                    # Recalc 5' 3' loops?
+
+                    if ( hs != 0 ):
+                        jndx = rna.link[is+1]
+                        if ( jndx == 0 ): rna.HELX_REAC(hs+1)
+                        if ( jndx != 0 ): rna.LOOP_REAC(jndx)
+                    #endif
+
+                    if ( js != 0 ):
+                        jndx = rna.link[jp+2]
+                        if ( jndx == 0 ): rna.HELX_REAC(jp+2)
+                        if ( jndx != 0 ): rna.LOOP_REAC(jndx)
+                    #endif
+
+                    # Recalc lower loop?
+
+                    if ( iloop == 0 ): kndx = 0
+                    if ( iloop == 1 ): kndx = rna.link[j]
+
+                    if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                    return
+
+                #endif
+            #endif
+
+            #=== Defect Diffusion ===#
+
+            # PUSH
+
+            icase = 0
+
+            if ( rna.link[ip] == 0 ):
+
+                icase = 2
+
+                if ( iloop == 1 ):
+                    if ( nh == 2 and ns == 1 ): icase = 3
+                    if ( nh == 1 and ns == 3 ): icase = 0
+                #endif
+
+            elif ( iloop == 0 or k != ke ):
+
+                icase = 1
+
+                if ( iloop == 1 ) and ( nh == 2 and ns == 1):
+                    icase = 4
+                #endif
+
+            #endif
+
+            if ( icase > 0 ):
+
+                # PUSH 5' end
+
+                kp = ip - 1
+
+                if ( kp >= 1 ) and ( rna.ibsp[kp] == 0 ):
+
+                    hs = rna.iseq[kp]
+                    js = rna.iseq[jp]
+
+                    if ( iwc[hs][js] == 1 ):
+
+                        dg = DELTAG_HD(rna,ip,jp,kp,dg)
+
+                        dg = dg / 2.0e0
+
+                        x = beta * dg
+                        x = math.exp(-x) * rated
+
+                        atot += x
+
+                        if ( atot >= amax ): GOTO 1 #!
+
+                    #endif
+                #endif
+
+                # PUSH 3' end
+
+                kp = jp + 1
+
+                if ( kp <= n ) and ( rna.ibsp[kp] == 0 ):
+
+                    hs = rna.iseq[ip]
+                    js = rna.iseq[kp]
+
+                    if ( iwc[hs][js] == 1 ):
+
+                        dg = DELTAG_HD(rna,ip,jp,kp,dg)
+
+                        dg = dg / 2.0e0
+
+                        x = beta * dg
+                        x = math.exp(-x) * rated
+
+                        atot += x
+
+                        if ( atot > amax ): GOTO 1 #!
+
+                    #endif
+                #endif
+            #endif
+
+            # PULL
+
+            icase = 0
+
+            if ( rna.link[ip] != 0 ) and ( iloop == 0 or k != ke ):
+
+                l  = rna.link[ip]
+                mh = rna.nhlx[l]
+                ms = rna.nsgl[l]
+
+                icase = 1
+
+                if ( mh == 1 and ms == 3 ): icase = 0
+                if ( mh == 2 and ms == 1 ): icase = 4
+
+            #endif
+
+            if ( icase > 0 ):
+
+                # PULL 5' end
+
+                kp = ip + 1
+
+                if ( rna.ibsp[kp] == 0 ):
+
+                    hs = rna.iseq[kp]
+                    js = rna.iseq[jp]
+
+                    if ( iwc[hs][js] == 1 ):
+
+                        dg = DELTAG_HD(rna,ip,jp,kp,dg)
+
+                        dg = dg / 2.0e0
+
+                        x = beta * dg
+                        x = math.exp(-x) * rated
+
+                        atot += x
+
+                        if ( atot >= amax ) GOTO 1
+
+                    #endif
+                #endif
+
+                # PULL 3' end
+
+                kp = jp - 1
+
+                if ( rna.ibsp[kp] == 0 ):
+
+                    hs = rna.iseq[ip]
+                    js = rna.iseq[kp]
+
+                    if ( iwc[hs][js] == 1 ):
+
+                        dg = DELTAG_HD(rna,ip,jp,kp,dg)
+
+                        dg = dg / 2.0e0
+
+                        x = beta * dg
+                        x = math.exp(-x) * rated
+
+                        atot += x
+
+                        if ( atot >= amax ) GOTO 1
+
+                    #endif
+                #endif
+            #endif
+
+1           if ( atot >= amax ):
+
+                # Adjust base pairs
 
 
 
-        #=== Defect Diffusion ===#
+
+
+
+
+
 
 
 
