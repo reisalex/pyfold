@@ -492,23 +492,4 @@ def LOOP_REAC(rna,indx):
     rna.LOOP_RESUM(indx)
 
     return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
