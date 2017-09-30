@@ -2,5 +2,6 @@ FIX LOG
 
 pnuc - where does it get created/allocated?
 
-Check indexing in:
-loop_init
+Check indexing EVERYWHERE
+
+Remove dg argument to DELTAG_XX

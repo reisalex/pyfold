@@ -745,15 +745,352 @@ def LOOP_FIRE(rna,indx,amax):
 
                 # Adjust base pairs
 
+                if ( kp == ip+1 or kp == ip-1 ):
+                    rna.ibsp[ip] = 0
+                    rna.ibsp[jp] = kp
+                    rna.ibsp[kp] = jp
+                else:
+                    rna.ibsp[ip] = kp
+                    rna.ibsp[jp] = 0
+                    rna.ibsp[kp] = ip
+                #endif
+
+                if ( icase == 1 ):
+
+                    jndx = rna.link[ip]
+
+                    if ( kp == ip+1 or kp == ip-1 ):
+                        rna.loop[jndx] = kp
+                        rna.link[kp] = rna.link[ip]
+                        rna.link[ip] = 0
+                    else:
+                        rna.link[kp] = rna.link[jp]
+                        rna.link[jp] = 0
+                    #endif
+
+                    if ( kp == ip+1 or kp == jp-1 ):
+                        rna.nsgl[indx] += 1
+                        rna.nsgl[jndx] -= 1
+                    else:
+                        rna.nsgl[indx] -= 1
+                        rna.nsgl[jndx] += 1
+                    #endif
+
+                    rna.LOOP_REAC(indx)
+                    rna.LOOP_REAC(jndx)
+
+                    # Recalc lower loop?
+
+                    if ( iloop == 0 ): kndx = 0
+                    if ( iloop == 1 ): kndx = rna.link[j]
+
+                    if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                elif ( icase == 2 ):
+
+                    # Add loop
+
+                    nl += 1
+
+                    rna.nl = nl
+
+                    r.link[jp-1] = nl
+
+                    if ( nl > nsum ):
+                        rna.nsum = 2 * nsum
+                    #endif
+
+                    if ( kp == jp+1 ):
+                        rna.link[ip] = nl
+                        rna.link[jp+1] = rna.link[jp]
+                        rna.link[jp] = 0
+                    else:
+                        rna.link[kp] = nl
+                    #endif
+
+                    if ( iloop == 1 and k == ke ):
+                        rna.loop[nl] = i - 1
+                        if ( kp == ip-1 ):
+                            rna.loop[indx] = i + 1
+                        #endif
+                    elif ( kp == ip-1 ):
+                        rna.loop[nl] = kp
+                    else:
+                        rna.loop[nl] = ip
+                    #endif
+
+                    rna.nsgl[indx] = ns - 1
+                    rna.nhlx[nl] = 2
+                    rna.nsgl[nl] = 1
+
+                    rna.LOOP_REAC(indx)
+                    rna.LOOP_REAC(nl)
+
+                    # Recalc upper loop?
+
+                    jndx = rna.link[ip+1]
+                    if ( jndx != 0 ): rna.LOOP_REAC(jndx)
+
+                    if ( iloop == 0 or k != ke ) and (jndx == 0 ):
+                        rna.HELX_REAC(ip+1)
+                    #endif
+
+                    # Recalc lower loop?
+
+                    if ( iloop == 0 ): kndx = 0
+                    if ( iloop == 1 ): kndx = rna.link[j]
+
+                    if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                elif ( icase == 3 ):
+
+                    # Move loop
+
+                    rna.link[jp-1] = rna.link[jp]
+                    rna.link[jp] = 0
+
+                    if ( kp == jp+1 ):
+                        rna.link[ip] = rna.link[ip-1]
+                        rna.link[ip-1] = 0
+                    else:
+                        rna.link[ip-1] = rna.link[ip-2]
+                        rna.link[ip-2] = 0
+                    #endif
+
+                    if ( k == ke ):
+
+                        rna.loop[indx] = ip-1
+
+                        kndx = rna.link[ip+1]
+
+                        if ( kp == ip-1 ): jndx = rna.link[i+1]
+                        if ( kp == jp+1 ): jndx = rna.link[i+2]
+
+                        if ( jndx == 0 ): rna.HELX_REAC(j-1)
+
+                    else:
+
+                        rna.loop[indx] = i+1
+
+                        jndx = rna.link[ip+1]
+                        kndx = rna.link[j]
+
+                        if ( jndx == 0 ): rna.HELX_REAC(ip+1)
+
+                    #endif
+
+                    rna.LOOP_REAC(indx)
+
+                    if ( jndx != 0 ): rna.LOOP_REAC(jndx)
+                    if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                elif ( icase == 4 ):
+
+                    # Delete loop
+
+                    if ( kp == ip+1 ):
+
+                        jndx = rna.link[ip]
+
+                        rna.nsgl[indx] = rna.nsgl[indx] + 1
+
+                        rna.link[ip] = 0
+                        rna.link[jp-1] = 0
+
+                        rna.LOOP_REAC(indx)
+
+                        # Recalc upper loop?
+
+                        kndx = rna.link[ip+2]
+
+                        if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+                        if ( kndx == 0 ): rna.HELX_REAC(r,ip+2)
+
+                        # Recalc lower loop?
+
+                        if ( iloop == 0 ): kndx = 0
+                        if ( iloop == 2 ): kndx = rna.link[j]
+
+                        if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                    elif ( kp == jp-1 ):
+
+                        jndx = rna.link[ip]
+
+                        rna.nsgl[indx] = rna.nsgl[indx] + 1
+
+                        rna.link[jp-1] = rna.link[jp]
+                        rna.link[ip]   = 0
+                        rna.link[jp]   = 0
+                        rna.link[jp-2] = 0
+
+                        rna.LOOP_REAC(indx)
+
+                        #--- Recalc upper loop? ---#
+
+                        kndx = rna.link[ip+1]
+
+                        if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+                        if ( kndx == 0 ): rna.HELX_REAC(ip+1)
+
+                        #--- Recalc lower loop? ---#
+
+                        if ( iloop == 0 ): kndx = 0
+                        if ( iloop == 1 ): kndx = rna.link[j]
+
+                        if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                    else:
+
+                        jndx = rna.link[ip]
+                        kndx = rna.link[j]
+
+                        rna.nsgl[jndx] = rna.nsgl[jndx] + 1
+
+                        rna.link[i]  = 0
+                        rna.link[jp] = 0
+
+                        if ( kp == ip-1 ):
+                            rna.loop[jndx] = ip - 1
+                            rna.link[ip-1] = rna.link[ip]
+                            rna.link[ip] = 0
+                        #endif
+
+                        #--- Recalc loops ---#
+
+                        rna.LOOP_REAC(jndx)
+
+                        if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                        jndx = indx
+
+                    #endif
+
+                    #--- Delete loop jndx ---#
+
+                    #--- Copy loop nl to jndx ---#
+
+                    if ( jndx != nl ):
+
+                        rna.loop[jndx] = rna.loop[nl]
+                        rna.nhlx[jndx] = rna.nhlx[nl]
+                        rna.nsgl[jndx] = rna.nsgl[nl]
+                        rna.ptot[jndx] = rna.ptot[nl]
+
+                        rna.LOOP_RESUM(jndx)
+
+                        hs = rna.loop[nl]
+
+                        rna.link[hs] = jndx
+
+                        l = hs + 1
+
+                        while ( l < rna.ibsp[hs] ):
+
+                            if ( rna.link[l] == nl ):
+                                rna.link[l] = jndx
+                            #endif
+
+                            if ( rna.ibsp[l] > l ):
+                                l = rna.ibsp[l]
+                            else:
+                                l += 1
+                            #endif
+
+                        #endwhile
+
+                    #endif
+
+                    rna.loop[nl] = 0
+                    rna.nhlx[nl] = 0
+                    rna.nsgl[nl] = 0
+                    rna.ptot[nl] = 0.0e0
+
+                    rna.LOOP_RESUM(nl)
+
+                    rna.nl = nl - 1
+
+                    if ( nsum > 2 ) and ( rna.nl <= nsum / 2 ):
+                        nsum = nsum / 2
+                        rna.nsum = nsum
+                        rna.psum[nsum] = 0.0e0
+                    #endif
+                #endif
+
+                return
+
+            #endif
+
+            #=== Open BP Inside Helix ===#
+
+            if ( rna.link[ip] == 0 ) and ( iloop == 1 and k == ke ):
+
+                hs = ip + 1
+                js = jp - 1
+
+                while ( rna.link[hs] == 0 ):
+
+                    atot += rna.wrk1[hs]
+
+                    hs += 1
+                    js -= 1
+
+                    if ( atot >= amax ):
+
+                        nl += 1
+
+                        rna.ibsp[hs-1] = 0
+                        rna.ibsp[js+1] = 0
+                        rna.nl = nl
+
+                        rna.loop[nl] = js
+                        rna.link[js] = nl
+                        rna.link[hs-2] = nl
+
+                        rna.nhlx[nl] = 2
+                        rna.nsgl[nl] = 2
+
+                        if ( nl > nsum ):
+                            rna.nsum = 2 * nsum
+                        #endif
+
+                        #--- Recalc upper loop? ---#
+
+                        jndx = rna.link[js+2]
+
+                        if ( jndx == 0 ): rna.HELX_REAC(js+2)
+                        if ( jndx != 0 ): rna.LOOP_REAC(jndx)
+
+                        #--- Calculate new loop ---#
+
+                        jndx = rna.link[js]
+
+                        rna.LOOP_REAC(jndx)
+
+                        #--- Recalc lower loop? ---#
+
+                        kndx = rna.link[hs]
+
+                        if ( kndx != 0 ): rna.LOOP_REAC(kndx)
+
+                        return
+
+                    #endif
+                #endwhile
+            #endif
+
+            if ( k != ke ):
+                k = rna.ibsp[k]
+                icnt += 1
+            #endif
+
+        #endif
+
+        k += 1
+        icnt += 1
+
+    #endwhile
+
+    return
 
 
-
-
-
-
-
-
-
-
-
-        #=== Open BP Inside Helix ===#

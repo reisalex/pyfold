@@ -56,8 +56,8 @@ class RNA_STRUC(object):
     def HELX_REAC(self):
         helx_reac.HELX_REAC(self)
 
-    def LOOP_REAC(self):
-        loop_reac.LOOP_REAC(self)
+    def LOOP_REAC(self,indx):
+        loop_reac.LOOP_REAC(self,indx)
 
     def LOOP_FIRE(self,indx,amax):
         loop_fire.LOOP_FIRE(self,indx,amax)
