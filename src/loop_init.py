@@ -29,6 +29,11 @@ def LOOP_INIT(rna):
     # ip,jp,kp,ks,ke
     # nsum
 
+    #=== Initialize RNA Data ===#
+
+    n = rna.n
+    rna.clear_loops()
+
     #=== Find loops ===#
 
     nl = 1

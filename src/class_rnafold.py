@@ -1,4 +1,5 @@
 """
+============================================================================
 Module: CLASS_RNAFOLD
 
 Description: A class structure containing subroutines and data elements
@@ -14,6 +15,7 @@ Dependencies:
 
 Author(s): Alex Reis
            Copyright (c) 2017 (Please refer to LICENCE)
+============================================================================           
 """
 
 
@@ -46,6 +48,20 @@ class RNA_STRUC(object):
 
     wrk1 = [0.0]*mxnt
     wrk2 = [0.0]*mxnt
+
+    def clear_loops(self):
+
+        self.link = [0]*mxnt
+        self.loop = [0]*mxnt
+        self.nhlx = [0]*mxnt
+        self.nsgl = [0]*mxnt
+
+        self.wrk1 = [0.0]*mxnt
+        self.wrk2 = [0.0]*mxnt
+
+        self.psum = [0.0]*mxnt
+        self.ptot = [0.0]*mxnt
+
 
     def LOOP_INIT(self):
         loop_init.LOOP_INIT(self)
