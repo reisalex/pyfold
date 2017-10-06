@@ -15,6 +15,14 @@ Author(s): Alex Reis
            Copyright (c) 2017 (Please refer to LICENCE)
 """
 
+#Global
+global pnuc,iwc,eaup
+global beta
+global gcons,temp
+global rateh,ratem,rated
+global mxnt
+global em,eh,es,eau
+
 # Allocatable arrays
 pnuc = []
 

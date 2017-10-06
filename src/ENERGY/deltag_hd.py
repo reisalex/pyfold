@@ -26,6 +26,7 @@ Author(s): Alex Reis
            Copyright (c) 2017 (Please refer to LICENCE)
 """
 
+import math
 from rnavar import em,eh,es,eaup,beta
 
 def DELTAG_HD(rna,ii,jj,kk):

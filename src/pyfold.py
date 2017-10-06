@@ -18,6 +18,7 @@ Author(s): Alex Reis
 import re
 from rnavar import mxnt
 from ssareaction import SSAREACTION
+from readdata import READDATA
 
 def PYFOLD(seq,fld_start=None,fld_stop=None,nsim=1,tmax=1.0):
 
@@ -39,6 +40,8 @@ def PYFOLD(seq,fld_start=None,fld_stop=None,nsim=1,tmax=1.0):
     # istart,istop
 
     # DEFAULT SETTINGS
+
+    READDATA()
 
     rna = RNA_STRUC()
 
