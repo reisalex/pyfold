@@ -155,4 +155,86 @@ def EBULGE(iseq,i,j,ip,jp,n):
         # 5' (i) A .   X (ip) 3'
         # 3' (j) U . . Y (jp) 5'
 
+        ilist[0] = iseq[i]
+        ilist[1] = iseq[j]
+        ilist[2] = iseq[i+1]
+        ilist[3] = iseq[ip-1]
+        ilist[4] = iseq[ip-2]
+        ilist[5] = iseq[j]
+        ilist[6] = iseq[i]
 
+        eb = TINT12(ilist)
+
+    elif ibul == 4:
+
+        # 5' (i) A . . X (ip) 3'
+        # 3' (j) U   . Y (jp) 5'
+
+        ilist[0] = iseq[jp]
+        ilist[1] = iseq[ip]
+        ilist[2] = iseq[jp+1]
+        ilist[3] = iseq[ip-1]
+        ilist[4] = iseq[ip-2]
+        ilist[5] = iseq[j]
+        ilist[6] = iseq[i]
+
+        eb = TINT12(ilist)
+
+    elif ibul == 5:
+
+        # 5' (i) A . . X (ip) 3'
+        # 3' (j) U . . Y (jp) 5'
+
+        ilist[0] = iseq[i]
+        ilist[1] = iseq[j]
+        ilist[2] = iseq[i+1]
+        ilist[3] = iseq[j-1]
+        ilist[4] = iseq[ip-1]
+        ilist[5] = iseq[jp+1]
+        ilist[6] = iseq[ip]
+        ilist[7] = iseq[jp]
+
+        eb = TINT22(ilist)
+
+    elif ibul == 6:
+
+        # 5' (i) A X . . G (ip) 3'
+        # 3' (j) U Y . . C (jp) 5'
+
+        ilist[0] = iseq[i]
+        ilist[1] = iseq[j]
+        ilist[2] = iseq[i+1]
+        ilist[3] = iseq[j-1]
+
+        #=== GAIL Rule ===#
+
+        if ( imin == 1 and imax > 2 ):
+
+            ilist[2] = 1
+            ilist[3] = 1
+
+        #endif
+
+        eb = TSTACKI(ilist)
+
+    else:
+
+        raise Exception('ERROR: ibul out of range [0-6]')
+
+    #endif
+
+    #=== PART 4 ---> Asymmetry Penalty ===#
+
+    if ( ibul == 6 ):
+
+        k = min(4,n1,n2)
+
+        x = float(na) * f[k]
+
+        x = min(x,3.0e0)
+
+        eb += x
+
+    #endif
+
+    return eb
