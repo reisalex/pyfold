@@ -35,7 +35,7 @@ def RANDOM(iseed):
     q = 127773
     r = 2836
 
-    hi = INT(iseed/q)
+    hi = int(iseed/q)
     lo = iseed % q
 
     test = a * lo - r * hi

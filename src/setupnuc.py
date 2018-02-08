@@ -35,9 +35,9 @@ def SETUPNUC(n):
     c2 = 3.9274668195e2 # rate in (1/uS)
     xp = 4.0000000000e0
 
-    pnuc[:] = 0.0e0
+    pnuc = [0.0]*n
 
-    for i in range(4,n):
+    for i in range(5,n):
 
         x = c * float(i-1)
         xi = 1.0e0 / x
@@ -46,7 +46,7 @@ def SETUPNUC(n):
 
             e = -7.0270e0 * xi + 0.4920e0 * x
             x = 84.90e0 * ( xi ** 5.50e0 )
-            x = c2 * c2 / beta
+            x = c2 * x / beta
 
             pnuc[i] = x * math.exp(e)
 
@@ -58,7 +58,6 @@ def SETUPNUC(n):
             x = c2 * x / beta
 
             pnuc[i] = x * e
-
 
     return pnuc
     
