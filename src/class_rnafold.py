@@ -49,7 +49,7 @@ class RNA_STRUC(object):
     wrk1 = [0.0]*mxnt
     wrk2 = [0.0]*mxnt
 
-    def clear_loops(self):
+    def CLEAR_LOOPS(self):
 
         self.link = [0]*mxnt
         self.loop = [0]*mxnt

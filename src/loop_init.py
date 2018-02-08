@@ -32,14 +32,14 @@ def LOOP_INIT(rna):
   #=== Initialize RNA Data ===#
 
   n = rna.n
-  rna.clear_loops()
+  rna.CLEAR_LOOPS()
 
   #=== Find loops ===#
 
   nl = 1
-  rna.loop[0] = n
+  rna.loop[1] = n
 
-  for i in range(0,n):
+  for i in range(1,n):
 
     j = rna.ibsp[i]
 
@@ -49,14 +49,14 @@ def LOOP_INIT(rna):
       jp = j - 1
 
       if ( rna.ibsp[ip] != jp ):
-        nl = nl + 1
+        nl += 1
         rna.loop(nl) = i
 
   rna.nl = nl
 
   #=== Make links ===#
 
-  for i in range(0,nl):
+  for i in range(1,nl):
 
     ip = rna.loop[i]
     jp = rna.ibsp[ip]
@@ -92,16 +92,16 @@ def LOOP_INIT(rna):
     rna.nhlx[i] = nh
     rna.nsgl[i] = ns
 
-  #=== Compute size of partial sum table ===#
+  # Compute size of partial sum table
 
   nsum = 2
   while ( nsum < nl ):
     nsum *= 2
   rna.nsum = nsum
 
-  #=== Compute reactions for loops ===#
+  # Compute reactions for loops
   
-  for i in range(0,nl):
+  for i in range(1,nl):
     rna.LOOP_REAC(i)
 
-  return
+  return rna
