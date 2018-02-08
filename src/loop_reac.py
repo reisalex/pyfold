@@ -2,7 +2,7 @@
 Subroutine: LOOP_REAC (RNA,INDX)
 
 Description: Recomputes the possible reactions within a loop element and
-             their corresponding rates.
+       their corresponding rates.
 
 ! Method:  There are 6 possible reactions around the loop:
 !
@@ -32,464 +32,464 @@ Description: Recomputes the possible reactions within a loop element and
 !                         A-U  -->  A-U
 
 Arguments:
-        
-             R - Class structure containing information on the
-                 RNA secondary structure and possible reactions.
-          INDX - The indx number of the loop element that reactions
-                 will be calculated for.
+    
+       R - Class structure containing information on the
+         RNA secondary structure and possible reactions.
+      INDX - The indx number of the loop element that reactions
+         will be calculated for.
 
 History:
 Version     Date            Comment
 --------    -------         --------------------
-            09/28/2017      Original Code
+      09/28/2017      Original Code
 
 Dependencies:
 
 Author(s): Alex Reis
-           Copyright (c) 2017 (Please refer to LICENCE)
+       Copyright (c) 2017 (Please refer to LICENCE)
 """
 
 import math
 
 def LOOP_REAC(rna,indx):
 
-    # VARIABLES
+  # VARIABLES
 
-    # INTEGERS
-    # indx,i,j,k,n,ip,jp,kp,hs,js
-    # ks,ke,l,lmx,icnt,iloop
-    # nt,nh,ns,mt,mh,ms,icase
+  # INTEGERS
+  # indx,i,j,k,n,ip,jp,kp,hs,js
+  # ks,ke,l,lmx,icnt,iloop
+  # nt,nh,ns,mt,mh,ms,icase
 
-    # FLOAT
-    # x,dg,atot,rate
+  # FLOAT
+  # x,dg,atot,rate
 
-    i = rna.loop[indx]
-    j = rna.ibsp[i]
-    n = rna.n
+  i = rna.loop[indx]
+  j = rna.ibsp[i]
+  n = rna.n
 
-    if ( i == n ): j = 1
+  if ( i == n ): j = 1
 
-    nh = rna.nhlx[indx]
-    ns = rna.nsgl[indx]
+  nh = rna.nhlx[indx]
+  ns = rna.nsgl[indx]
 
-    nt = ns + 2 * nh
+  nt = ns + 2 * nh
 
-    #--- Internal Loop iloop = 1 ---#
-    #--- External Loop iloop = 0 ---#
+  #--- Internal Loop iloop = 1 ---#
+  #--- External Loop iloop = 0 ---#
 
-    if ( i < j ): iloop = 1
-    if ( i > j ): iloop = 0
+  if ( i < j ): iloop = 1
+  if ( i > j ): iloop = 0
 
-    if ( iloop == 1 ):
-        ks = i + 1
-        ke = j
-    else:
-        ks = j
-        ke = i
+  if ( iloop == 1 ):
+    ks = i + 1
+    ke = j
+  else:
+    ks = j
+    ke = i
+  #endif
+
+  #=== COMPUTE REACTIONS ===#
+
+  atot = 0.0e0
+
+  k = ks
+  icnt = 0
+
+  while ( k <= ke ):
+
+    #=== Nucleation Events ===#
+
+    if ( rna.ibsp[k] == 0 ):
+
+      rna.wrk1[k] = 0.0e0
+      rna.wrk2[k] = 0.0e0
+
+      x = 0.0e0
+
+      l = 2
+      lmx = nt / 2 + 1
+
+      if ( nt % 2 == 0 ) and ( icnt+1 > lmx-1 ):
+        lmx -= 1
+      #endif
+
+      if ( iloop == 0 ): lmx = nt - icnt
+
+      kp = k + 1
+      hs = rna.iseq[k]
+
+      while ( l <= lmx ):
+
+        if ( rna.ibsp[kp] == 0 ):
+
+          js = rna.iseq[kp]
+
+          if ( l > 4 and iwc[hs][js] == 1 ):
+            x += pnuc[l]
+          #endif
+
+        else:
+
+          l += 1
+          kp = rna.ibsp[kp]
+        #endif
+        
+        l += 1
+        kp += 1
+
+      #endwhile
+
+      rna.wrk1[k] = x
+      atot += x
+
     #endif
 
-    #=== COMPUTE REACTIONS ===#
+    #=== Helix Events ===#
 
-    atot = 0.0e0
+    if ( rna.ibsp[k] > 0 ):
 
-    k = ks
-    icnt = 0
+      ip = k
+      jp = rna.ibsp[k]
 
-    while ( k <= ke ):
+      rna.wrk1[jp] = 0.0e0
+      rna.wrk2[ip] = 0.0e0
 
-        #=== Nucleation Events ===#
+      if ( rna.link[ip] == 0 ):
+        rna.wrk1[ip] = 0.0e0
+        rna.wrk2[jp] = 0.0e0
+      #endif
 
-        if ( rna.ibsp[k] == 0 ):
+      icase = 0
 
-            rna.wrk1[k] = 0.0e0
-            rna.wrk2[k] = 0.0e0
+      #=== Helix Extension ===#
 
-            x = 0.0e0
+      if  ( ip > 1 and jp < n ) and \
+        ( nh > 1 or ns > 4 ) and \
+        ( rna.ibsp[ip-1] == 0 and rna.ibsp[jp+1] == 0 ):
 
-            l = 2
-            lmx = nt / 2 + 1
+        hs = rna.iseq[ip-1]
+        js = rna.iseq[jp+1]
 
-            if ( nt % 2 == 0 ) and ( icnt+1 > lmx-1 ):
-                lmx -= 1
+        if ( iwc[hs][js] == 1 ):
+
+          icase = 1
+
+          if ( iloop == 1 ):
+            if ( nh == 2 and ns == 2 ):
+              icase = 2
+              if ( k == ke ): icase = 0
+            elif ( k == ke ):
+              icase = 3
             #endif
+          #endif
+        #endif
+      #endif
 
-            if ( iloop == 0 ): lmx = nt - icnt
+      if ( icase > 0 ):
 
-            kp = k + 1
-            hs = rna.iseq[k]
+        dg = DELTAG_HE(rna,ip,jp,dg)
 
-            while ( l <= lmx ):
+        dg = dg / 2.0e0
 
-                if ( rna.ibsp[kp] == 0 ):
+        x = beta * dg
+        x = math.exp(-x) * rateh
 
-                    js = rna.iseq[kp]
+        rna.wrk2[ip] = x
+        atot += x
 
-                    if ( l > 4 and iwc[hs][js] == 1 ):
-                        x += pnuc[l]
-                    #endif
+      #endif
 
-                else:
+      icase = 0
 
-                    l += 1
-                    kp = rna.ibsp[kp]
-                #endif
-                
-                l += 1
-                kp += 1
+      #=== Helix Retraction ===#
 
-            #endwhile
+      if ( ip != n and jp != 1 ):
 
-            rna.wrk1[k] = x
+        if ( rna.ibsp[ip+1] == jp-1 ):
+
+          icase = 1
+
+          if ( iloop == 1 ) and ( k == ke ):
+            icase = 2
+          #endif
+
+          rate = rateh
+
+        elif ( iloop == 0 or k != ke ):
+
+          icase = 3
+
+          l = rna.link[ip]
+          mh = rna.nhlx[l]
+          ms = rna.nsgl[l]
+
+          mt = ms + 2 * mh
+
+          if ( iloop == 1 ):
+            l = min(nt,mt)
+          else:
+            l = mt
+          #endif
+
+          rate = pnuc[l]
+
+        #endif
+      #endif
+
+      if ( icase > 0 ):
+
+        dg = DELTAG_HR(rna,ip,jp,dg)
+
+        if ( icase != 3 ):
+          dg = dg / 2.0e0
+        #endif
+
+        x = beta * dg
+        x = mat.exp(-x) * rate
+
+        if ( icase == 2 ):
+          rna.wrk1[ip] = x
+        else:
+          rna.wrk1[jp] = x
+        #endif
+
+        atot += x
+
+      #endif
+
+      icase = 0
+
+      #=== Helix Morphing ===#
+
+      if  ( iloop == 0 or nh > 2 ) and \
+        ( ip > 1 and jp < n ):
+
+        hs = rna.iseq[ip-1]
+        js = rna.iseq[jp+1]
+
+        if ( iwc[hs][js] == 1 ): icase = 1
+
+        hs = rna.ibsp[ip-1]
+        js = rna.ibsp[jp+1]
+
+        if ( hs != 0 ) and ( rna.link[hs] != 0 ):
+          icase = 0
+        #endif
+
+        if ( js != 0 ) and (rna.link[jp+1] != 0 ):
+          icase = 0
+        #endif
+
+        if ( hs == 0 and js == 0 ):
+          icase = 0
+        #endif
+
+      #endif
+
+      if ( icase > 0 ):
+
+        dg = DELTAG_HM(rna,ip,jp,dg)
+
+        dg = dg / 2.0e0
+
+        x = beta * dg
+        x = math.exp(-x) * ratem
+
+        atot += x
+
+      #endif
+
+      #=== Defect Diffusion ===#
+
+      #--- PUSH ---#
+
+      icase = 0
+
+      if ( rna.link[ip] == 0 ):
+
+        icase = 2
+
+        if ( iloop == 1 ):
+          if ( nh == 2 and ns == 1 ): icase = 3
+          if ( nh == 1 and ns == 3 ): icase = 0
+        #endif
+
+      elif ( iloop == 0 or k != ke ):
+
+        icase = 1
+
+        if ( iloop == 1 ) and ( nh == 2 and ns == 1 ):
+          icase = 4
+        #endif
+
+      #endif
+
+      if ( icase > 0 ):
+
+        #--- Push 5' end ---#
+
+        kp = ip - 1
+
+        if ( kp >= 1 ) and ( rna.ibsp[kp] == 0 ):
+
+          hs = rna.iseq[kp]
+          js = rna.iseq[jp]
+
+          if ( iwc[hs][js] == 1 ):
+
+            dg = DELTAG_HD(rna,ip,jp,kp)
+
+            dg = dg / 2.0e0
+
+            x = beta * dg
+            x = math.exp(-x) * rated
+
             atot += x
 
+          #endif
         #endif
 
-        #=== Helix Events ===#
+        #--- Push 3' end ---#
 
-        if ( rna.ibsp[k] > 0 ):
+        kp = jp + 1
 
-            ip = k
-            jp = rna.ibsp[k]
+        if ( kp <= n ) and ( rna.ibsp[kp] == 0 ):
 
-            rna.wrk1[jp] = 0.0e0
-            rna.wrk2[ip] = 0.0e0
+          hs = rna.iseq[ip]
+          js = rna.iseq[kp]
 
-            if ( rna.link[ip] == 0 ):
-                rna.wrk1[ip] = 0.0e0
-                rna.wrk2[jp] = 0.0e0
-            #endif
+          if ( iwc[hs][js] == 1 ):
 
-            icase = 0
+            dg = DELTAG_HD(rna,ip,jp,kp)
 
-            #=== Helix Extension ===#
+            dg = dg / 2.0e0
 
-            if  ( ip > 1 and jp < n ) and \
-                ( nh > 1 or ns > 4 ) and \
-                ( rna.ibsp[ip-1] == 0 and rna.ibsp[jp+1] == 0 ):
+            x = beta * dg
+            x = math.exp(-x) * rated
 
-                hs = rna.iseq[ip-1]
-                js = rna.iseq[jp+1]
+            atot += x
 
-                if ( iwc[hs][js] == 1 ):
+          #endif
+        #endif
+      #endif
 
-                    icase = 1
+      #--- PULL ---#
 
-                    if ( iloop == 1 ):
-                        if ( nh == 2 and ns == 2 ):
-                            icase = 2
-                            if ( k == ke ): icase = 0
-                        elif ( k == ke ):
-                            icase = 3
-                        #endif
-                    #endif
-                #endif
-            #endif
+      icase = 0
 
-            if ( icase > 0 ):
+      if  ( rna.link[ip] != 0 ) and \
+        ( iloop == 0 or k != 0 ):
 
-                dg = DELTAG_HE(rna,ip,jp,dg)
+        l  = rna.link[ip]
+        mh = rna.nhlx[l]
+        ms = rna.nsgl[l]
 
-                dg = dg / 2.0e0
+        icase = 1
 
-                x = beta * dg
-                x = math.exp(-x) * rateh
+        if ( mh == 1 and ms == 3 ): icase = 0
+        if ( mh == 2 and ms == 1 ): icase = 4
 
-                rna.wrk2[ip] = x
-                atot += x
+      #endif
 
-            #endif
+      if ( icase > 0):
 
-            icase = 0
+        #--- Pull 5' end ---#
 
-            #=== Helix Retraction ===#
+        kp = ip + 1
 
-            if ( ip != n and jp != 1 ):
+        if ( rna.ibsp[kp] == 0 ):
 
-                if ( rna.ibsp[ip+1] == jp-1 ):
+          hs = rna.iseq[kp]
+          js = rna.iseq[jp]
 
-                    icase = 1
+          if ( iwc[hs][js] == 1 ):
 
-                    if ( iloop == 1 ) and ( k == ke ):
-                        icase = 2
-                    #endif
+            dg = DELTAG_HD(rna,ip,jp,kp)
 
-                    rate = rateh
+            dg = dg / 2.0e0
 
-                elif ( iloop == 0 or k != ke ):
+            x = beta * dg
+            x = math.exp(-x) * rated
 
-                    icase = 3
+            atot += x
 
-                    l = rna.link[ip]
-                    mh = rna.nhlx[l]
-                    ms = rna.nsgl[l]
-
-                    mt = ms + 2 * mh
-
-                    if ( iloop == 1 ):
-                        l = min(nt,mt)
-                    else:
-                        l = mt
-                    #endif
-
-                    rate = pnuc[l]
-
-                #endif
-            #endif
-
-            if ( icase > 0 ):
-
-                dg = DELTAG_HR(rna,ip,jp,dg)
-
-                if ( icase != 3 ):
-                    dg = dg / 2.0e0
-                #endif
-
-                x = beta * dg
-                x = mat.exp(-x) * rate
-
-                if ( icase == 2 ):
-                    rna.wrk1[ip] = x
-                else:
-                    rna.wrk1[jp] = x
-                #endif
-
-                atot += x
-
-            #endif
-
-            icase = 0
-
-            #=== Helix Morphing ===#
-
-            if  ( iloop == 0 or nh > 2 ) and \
-                ( ip > 1 and jp < n ):
-
-                hs = rna.iseq[ip-1]
-                js = rna.iseq[jp+1]
-
-                if ( iwc[hs][js] == 1 ): icase = 1
-
-                hs = rna.ibsp[ip-1]
-                js = rna.ibsp[jp+1]
-
-                if ( hs != 0 ) and ( rna.link[hs] != 0 ):
-                    icase = 0
-                #endif
-
-                if ( js != 0 ) and (rna.link[jp+1] != 0 ):
-                    icase = 0
-                #endif
-
-                if ( hs == 0 and js == 0 ):
-                    icase = 0
-                #endif
-
-            #endif
-
-            if ( icase > 0 ):
-
-                dg = DELTAG_HM(rna,ip,jp,dg)
-
-                dg = dg / 2.0e0
-
-                x = beta * dg
-                x = math.exp(-x) * ratem
-
-                atot += x
-
-            #endif
-
-            #=== Defect Diffusion ===#
-
-            #--- PUSH ---#
-
-            icase = 0
-
-            if ( rna.link[ip] == 0 ):
-
-                icase = 2
-
-                if ( iloop == 1 ):
-                    if ( nh == 2 and ns == 1 ): icase = 3
-                    if ( nh == 1 and ns == 3 ): icase = 0
-                #endif
-
-            elif ( iloop == 0 or k != ke ):
-
-                icase = 1
-
-                if ( iloop == 1 ) and ( nh == 2 and ns == 1 ):
-                    icase = 4
-                #endif
-
-            #endif
-
-            if ( icase > 0 ):
-
-                #--- Push 5' end ---#
-
-                kp = ip - 1
-
-                if ( kp >= 1 ) and ( rna.ibsp[kp] == 0 ):
-
-                    hs = rna.iseq[kp]
-                    js = rna.iseq[jp]
-
-                    if ( iwc[hs][js] == 1 ):
-
-                        dg = DELTAG_HD(rna,ip,jp,kp)
-
-                        dg = dg / 2.0e0
-
-                        x = beta * dg
-                        x = math.exp(-x) * rated
-
-                        atot += x
-
-                    #endif
-                #endif
-
-                #--- Push 3' end ---#
-
-                kp = jp + 1
-
-                if ( kp <= n ) and ( rna.ibsp[kp] == 0 ):
-
-                    hs = rna.iseq[ip]
-                    js = rna.iseq[kp]
-
-                    if ( iwc[hs][js] == 1 ):
-
-                        dg = DELTAG_HD(rna,ip,jp,kp)
-
-                        dg = dg / 2.0e0
-
-                        x = beta * dg
-                        x = math.exp(-x) * rated
-
-                        atot += x
-
-                    #endif
-                #endif
-            #endif
-
-            #--- PULL ---#
-
-            icase = 0
-
-            if  ( rna.link[ip] != 0 ) and \
-                ( iloop == 0 or k != 0 ):
-
-                l  = rna.link[ip]
-                mh = rna.nhlx[l]
-                ms = rna.nsgl[l]
-
-                icase = 1
-
-                if ( mh == 1 and ms == 3 ): icase = 0
-                if ( mh == 2 and ms == 1 ): icase = 4
-
-            #endif
-
-            if ( icase > 0):
-
-                #--- Pull 5' end ---#
-
-                kp = ip + 1
-
-                if ( rna.ibsp[kp] == 0 ):
-
-                    hs = rna.iseq[kp]
-                    js = rna.iseq[jp]
-
-                    if ( iwc[hs][js] == 1 ):
-
-                        dg = DELTAG_HD(rna,ip,jp,kp)
-
-                        dg = dg / 2.0e0
-
-                        x = beta * dg
-                        x = math.exp(-x) * rated
-
-                        atot += x
-
-                    #endif
-                #endif
-
-                #--- Pull 3' end ---#
-
-                kp = jp - 1
-
-                if ( rna.ibsp[kp] == 0 ):
-
-                    hs = rna.iseq[ip]
-                    js = rna.iseq[kp]
-
-                    if ( iwc[hs][js] == 1 ):
-
-                        dg = DELTAG_HD(rna,ip,jp,kp)
-
-                        dg = dg / 2.0e0
-
-                        x = beta * dg
-                        x = math.exp(-x) * rated
-
-                        atot += x
-
-                    #endif
-                #endif
-            #endif
-
-            #=== Save Loop Reaction Rate ===#
-
-            if ( iloop == 1 ): rna.wrk1[i] = atot
-
-            #=== Open Internal Helix BP ===#
-
-            if  ( rna.link[ip] == 0 ) and \
-                ( iloop == 1 and k == ke ):
-
-                hs = ip + 1
-                js = jp - 1
-
-                while ( rna.link[hs] == 0 ):
-
-                    dg = DELTAG_HI(rna,hs,js)
-
-                    dg = dg / 2.0e0
-
-                    x = beta * dg
-                    x = math.exp(-x) * rateh
-
-                    rna.wrk1[hs] = x
-                    rna.wrk1[js] = 0.0e0
-
-                    rna.wrk2[hs] = 0.0e0
-                    rna.wrk2[js] = 0.0e0
-
-                    atot += x
-
-                    hs += 1
-                    js -= 1
-
-                #endwhile
-            #endif
-
-            if ( k != ke ):
-                k = rna.ibsp[k]
-                icnt += 1
-            #endif
-
+          #endif
         #endif
 
-        k += 1
+        #--- Pull 3' end ---#
+
+        kp = jp - 1
+
+        if ( rna.ibsp[kp] == 0 ):
+
+          hs = rna.iseq[ip]
+          js = rna.iseq[kp]
+
+          if ( iwc[hs][js] == 1 ):
+
+            dg = DELTAG_HD(rna,ip,jp,kp)
+
+            dg = dg / 2.0e0
+
+            x = beta * dg
+            x = math.exp(-x) * rated
+
+            atot += x
+
+          #endif
+        #endif
+      #endif
+
+      #=== Save Loop Reaction Rate ===#
+
+      if ( iloop == 1 ): rna.wrk1[i] = atot
+
+      #=== Open Internal Helix BP ===#
+
+      if  ( rna.link[ip] == 0 ) and \
+        ( iloop == 1 and k == ke ):
+
+        hs = ip + 1
+        js = jp - 1
+
+        while ( rna.link[hs] == 0 ):
+
+          dg = DELTAG_HI(rna,hs,js)
+
+          dg = dg / 2.0e0
+
+          x = beta * dg
+          x = math.exp(-x) * rateh
+
+          rna.wrk1[hs] = x
+          rna.wrk1[js] = 0.0e0
+
+          rna.wrk2[hs] = 0.0e0
+          rna.wrk2[js] = 0.0e0
+
+          atot += x
+
+          hs += 1
+          js -= 1
+
+        #endwhile
+      #endif
+
+      if ( k != ke ):
+        k = rna.ibsp[k]
         icnt += 1
+      #endif
 
-    #endwhile
+    #endif
 
-    rna.ptot[indx] = atot
+    k += 1
+    icnt += 1
 
-    rna.LOOP_RESUM(indx)
+  #endwhile
 
-    return
-    
+  rna.ptot[indx] = atot
+
+  rna.LOOP_RESUM(indx)
+
+  return
+  

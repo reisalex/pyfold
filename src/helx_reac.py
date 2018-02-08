@@ -31,63 +31,63 @@ import math
 
 def HELX_REAC(rna,indx):
 
-    # Variables
+  # Variables
 
-    # INTEGER
-    # ke,ip,jp,indx
+  # INTEGER
+  # ke,ip,jp,indx
 
-    # FLOAT
-    # x,dg,atot
+  # FLOAT
+  # x,dg,atot
 
-    jp = indx
+  jp = indx
 
-    ip = rna.ibsp[jp]
-    jp = min(ip,jp)
+  ip = rna.ibsp[jp]
+  jp = min(ip,jp)
 
-    while ( rna.link[jp] == 0 ):
-        jp += 1
+  while ( rna.link[jp] == 0 ):
+      jp += 1
+  #endwhile
+
+  indx = rna.link[jp]
+
+  #=== Open BP Inside Helix ===#
+
+  ke = rna.ibsp[jp]
+  ip = rna.ibsp[jp]
+
+  atot = rna.wrk1[jp]
+
+  if ( rna.link[ke] == 0 ):
+
+    ip += 1
+    jp -= 1
+
+    while ( rna.link[ip] == 0 ):
+
+      dg = DELTAG_HI(rna,ip,jp)
+
+      dg = dg / 2.0e0
+
+      x = beta * dg
+      x = math.exp(-x) * rateh
+
+      rna.wrk1[ip] = x
+      rna.wrk1[jp] = 0.0e0
+
+      rna.wrk2[ip] = 0.0e0
+      rna.wrk2[jp] = 0.0e0
+
+      atot += x
+      
+      ip += 1
+      ip -= 1
+
     #endwhile
+  #endif
 
-    indx = rna.link[jp]
+  rna.ptot[indx] = atot
 
-    #=== Open BP Inside Helix ===#
+  rna.LOOP_RESUM(indx)
 
-    ke = rna.ibsp[jp]
-    ip = rna.ibsp[jp]
-
-    atot = rna.wrk1[jp]
-
-    if ( rna.link[ke] == 0 ):
-
-        ip += 1
-        jp -= 1
-
-        while ( rna.link[ip] == 0 ):
-
-            dg = DELTAG_HI(rna,ip,jp)
-
-            dg = dg / 2.0e0
-
-            x = beta * dg
-            x = math.exp(-x) * rateh
-
-            rna.wrk1[ip] = x
-            rna.wrk1[jp] = 0.0e0
-
-            rna.wrk2[ip] = 0.0e0
-            rna.wrk2[jp] = 0.0e0
-
-            atot += x
-            
-            ip += 1
-            ip -= 1
-
-        #endwhile
-    #endif
-
-    rna.ptot[indx] = atot
-
-    rna.LOOP_RESUM(indx)
-
-    return
+  return
 

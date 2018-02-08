@@ -31,29 +31,20 @@ Author(s): Alex Reis
 
 def CONVERT(gseq,iseq,nn):
 
-    # Arguments
-    # nn, iseq(nn), gseq(nn)
+  # Arguments
+  # nn, iseq(nn), gseq(nn)
 
-    # Variables
-    # i
+  # Variables
+  # i
 
-    for i in range(0,nn):
+  iseq = [0]*nn
 
-        iseq(i) = 0
+  for i in range(0,nn):
+    
+    if   gseq[i] == 'A': iseq[i] = 1
+    elif gseq[i] == 'C': iseq[i] = 2
+    elif gseq[i] == 'G': iseq[i] = 3
+    elif gseq[i] == 'U': iseq[i] = 4
+    else: raise Exception('Bad character in RNA sequence.')
 
-        if   gseq[i] == 'A':
-            iseq[i] = 1
-
-        elif gseq[i] == 'C':
-            iseq[i] = 2
-
-        elif gseq[i] == 'G':
-            iseq[i] = 3
-
-        elif gseq[i] == 'U':
-            iseq[i] = 4
-
-        else:
-            raise Exception('Bad character in RNA sequence.')
-
-    return iseq
+  return iseq
