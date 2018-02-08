@@ -74,8 +74,8 @@ def LOOP_REAC(rna,indx):
 
   nt = ns + 2 * nh
 
-  #--- Internal Loop iloop = 1 ---#
-  #--- External Loop iloop = 0 ---#
+  # Internal Loop iloop = 1
+  # External Loop iloop = 0
 
   if ( i < j ): iloop = 1
   if ( i > j ): iloop = 0
@@ -132,6 +132,7 @@ def LOOP_REAC(rna,indx):
 
           l += 1
           kp = rna.ibsp[kp]
+
         #endif
         
         l += 1
@@ -163,9 +164,9 @@ def LOOP_REAC(rna,indx):
 
       #=== Helix Extension ===#
 
-      if  ( ip > 1 and jp < n ) and \
-        ( nh > 1 or ns > 4 ) and \
-        ( rna.ibsp[ip-1] == 0 and rna.ibsp[jp+1] == 0 ):
+      if ( ip > 1 and jp < n ) and \
+         ( nh > 1 or ns > 4 )  and \
+         ( rna.ibsp[ip-1] == 0 and rna.ibsp[jp+1] == 0 ):
 
         hs = rna.iseq[ip-1]
         js = rna.iseq[jp+1]
@@ -187,7 +188,7 @@ def LOOP_REAC(rna,indx):
 
       if ( icase > 0 ):
 
-        dg = DELTAG_HE(rna,ip,jp,dg)
+        dg = DELTAG_HE(rna,ip,jp)
 
         dg = dg / 2.0e0
 
@@ -219,7 +220,7 @@ def LOOP_REAC(rna,indx):
 
           icase = 3
 
-          l = rna.link[ip]
+          l  = rna.link[ip]
           mh = rna.nhlx[l]
           ms = rna.nsgl[l]
 
@@ -238,7 +239,7 @@ def LOOP_REAC(rna,indx):
 
       if ( icase > 0 ):
 
-        dg = DELTAG_HR(rna,ip,jp,dg)
+        dg = DELTAG_HR(rna,ip,jp)
 
         if ( icase != 3 ):
           dg = dg / 2.0e0
@@ -261,8 +262,8 @@ def LOOP_REAC(rna,indx):
 
       #=== Helix Morphing ===#
 
-      if  ( iloop == 0 or nh > 2 ) and \
-        ( ip > 1 and jp < n ):
+      if ( iloop == 0 or nh > 2 ) and \
+         ( ip > 1 and jp < n ):
 
         hs = rna.iseq[ip-1]
         js = rna.iseq[jp+1]
@@ -288,7 +289,7 @@ def LOOP_REAC(rna,indx):
 
       if ( icase > 0 ):
 
-        dg = DELTAG_HM(rna,ip,jp,dg)
+        dg = DELTAG_HM(rna,ip,jp)
 
         dg = dg / 2.0e0
 
@@ -301,7 +302,7 @@ def LOOP_REAC(rna,indx):
 
       #=== Defect Diffusion ===#
 
-      #--- PUSH ---#
+      # PUSH
 
       icase = 0
 
@@ -326,7 +327,7 @@ def LOOP_REAC(rna,indx):
 
       if ( icase > 0 ):
 
-        #--- Push 5' end ---#
+        # Push 5' end
 
         kp = ip - 1
 
@@ -349,7 +350,7 @@ def LOOP_REAC(rna,indx):
           #endif
         #endif
 
-        #--- Push 3' end ---#
+        # Push 3' end
 
         kp = jp + 1
 
@@ -373,12 +374,12 @@ def LOOP_REAC(rna,indx):
         #endif
       #endif
 
-      #--- PULL ---#
+      # PULL
 
       icase = 0
 
-      if  ( rna.link[ip] != 0 ) and \
-        ( iloop == 0 or k != 0 ):
+      if ( rna.link[ip] != 0 ) and \
+         ( iloop == 0 or k != ke ):
 
         l  = rna.link[ip]
         mh = rna.nhlx[l]
@@ -391,9 +392,9 @@ def LOOP_REAC(rna,indx):
 
       #endif
 
-      if ( icase > 0):
+      if ( icase > 0 ):
 
-        #--- Pull 5' end ---#
+        # Pull 5' end
 
         kp = ip + 1
 
@@ -416,7 +417,7 @@ def LOOP_REAC(rna,indx):
           #endif
         #endif
 
-        #--- Pull 3' end ---#
+        # Pull 3' end
 
         kp = jp - 1
 
@@ -446,8 +447,8 @@ def LOOP_REAC(rna,indx):
 
       #=== Open Internal Helix BP ===#
 
-      if  ( rna.link[ip] == 0 ) and \
-        ( iloop == 1 and k == ke ):
+      if ( rna.link[ip] == 0 ) and \
+         ( iloop == 1 and k == ke ):
 
         hs = ip + 1
         js = jp - 1
@@ -491,5 +492,5 @@ def LOOP_REAC(rna,indx):
 
   rna.LOOP_RESUM(indx)
 
-  return
+  return rna
   
