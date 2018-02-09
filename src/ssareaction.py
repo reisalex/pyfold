@@ -53,7 +53,7 @@ def SSAREACTION(rna,iseed,time,tout):
 
     #=== Total transition rate ===#
     n = rna.nsum / 2
-    atot = rna.psum(n)
+    atot = rna.psum[n]
 
     #=== Compute time increment ===#
     r,iseed = RANDOM(iseed)
@@ -61,8 +61,11 @@ def SSAREACTION(rna,iseed,time,tout):
     tau = math.log(1.0/r)
     tau = tau / atot
 
+    time += tau
+
     #=== Output current structure? ===#
     if time > tout:
+        pass
         # do write things
 
     #=== Fire reaction ===#
@@ -75,23 +78,23 @@ def SSAREACTION(rna,iseed,time,tout):
     while (n % 2 == 0):
         n = n / 2
         j = i - n
-        r = rna.psum(j)
+        r = rna.psum[j]
         if (r >= amax):
             i = j
         else:
-            i = i + n
-            amax = amax - r
+            i += n
+            amax -= r
 
     #=== Choose between i and i+1 ===#
-    r = rna.ptot(i)
+    r = rna.ptot[i]
     if ( r >= amax ):
         indx = i
     else:
         indx = i + 1
-        amax = amax - r
+        amax -= r
 
     #=== Fire reaction ===#
     rna.LOOP_FIRE(indx,amax)
 
-    return rna,iseed
+    return rna,iseed,time
 
