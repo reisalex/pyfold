@@ -255,7 +255,7 @@ def DELTAG_HR(rna,ii,jj):
       e3 = EDANGLE(rna.iseq,ii,jj,ii+1,n)
 
       ip = ii + 2
-      jp = =rna.ibsp[ip]
+      jp = rna.ibsp[ip]
 
       if ( jp != 0 ):
         ed = EDANGLE(rna.iseq,ip,jp,ii+1,n)
