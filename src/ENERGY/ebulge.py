@@ -158,10 +158,10 @@ def EBULGE(iseq,i,j,ip,jp,n):
         ilist[0] = iseq[i]
         ilist[1] = iseq[j]
         ilist[2] = iseq[i+1]
-        ilist[3] = iseq[ip-1]
-        ilist[4] = iseq[ip-2]
-        ilist[5] = iseq[j]
-        ilist[6] = iseq[i]
+        ilist[3] = iseq[j-1]
+        ilist[4] = iseq[j-2]
+        ilist[5] = iseq[ip]
+        ilist[6] = iseq[jp]
 
         eb = TINT12(ilist)
 
