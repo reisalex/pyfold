@@ -51,11 +51,11 @@ eau = 0.50e0
 
 class EnergyParameters(object):
 
-    available_files = [   "dna_mathews1999.par",
-                           "rna_turner1999.par",
-                          "dna_mathews2004.par",
-                           "rna_turner2004.par",
-                       "rna_andronescu2007.par"]
+    # available_files = [   "dna_mathews1999.par",
+    #                        "rna_turner1999.par",
+    #                       "dna_mathews2004.par",
+    #                        "rna_turner2004.par",
+    #                    "rna_andronescu2007.par"]
 
     temp = 310.15 # default temperature (37.0 C)
 
@@ -221,14 +221,5 @@ class EnergyParameters(object):
 
     def set_temp(self,temperature):
         self.temp = temperature + 273.15 # convert to Kelvin
-
-    def read(self,parameter_file):
-
-        assert parameter_file in self.available_files, \
-        "Parameter file must be one of the following: {}".format(self.available_files)
-        self.file = parameter_file
-        with open(self.file) as f:
-            content = [x.strip('\n') for x in f.readlines()]
-
 
 
