@@ -17,18 +17,31 @@ basepairs = [ (1,2), (2,1), (2,3), (3,2), (0,3), (3,0) ]
 
 class FreeEnergyParameters:
     def __init__(self):
-        self.dG_stack   = np.zeros(shape=(4,4,4,4),         dtype=float)
-        self.dH_stack   = np.zeros(shape=(4,4,4,4),         dtype=float)
-        self.dG_dangle5 = np.zeros(shape=(4,4,4),           dtype=float)
-        self.dH_dangle5 = np.zeros(shape=(4,4,4),           dtype=float)
-        self.dG_dangle3 = np.zeros(shape=(4,4,4),           dtype=float)
-        self.dH_dangle3 = np.zeros(shape=(4,4,4),           dtype=float)
-        self.dG_int11   = np.zeros(shape=(4,4,4,4,4,4),     dtype=float)
-        self.dH_int11   = np.zeros(shape=(4,4,4,4,4,4),     dtype=float)
-        self.dG_int21   = np.zeros(shape=(4,4,4,4,4,4,4),   dtype=float)
-        self.dH_int21   = np.zeros(shape=(4,4,4,4,4,4,4),   dtype=float)
-        self.dG_int22   = np.zeros(shape=(4,4,4,4,4,4,4,4), dtype=float)
-        self.dH_int22   = np.zeros(shape=(4,4,4,4,4,4,4,4), dtype=float)
+        # self.dG_stack   = np.zeros(shape=(4,4,4,4),         dtype=float)
+        # self.dH_stack   = np.zeros(shape=(4,4,4,4),         dtype=float)
+        # self.dG_dangle5 = np.zeros(shape=(4,4,4),           dtype=float)
+        # self.dH_dangle5 = np.zeros(shape=(4,4,4),           dtype=float)
+        # self.dG_dangle3 = np.zeros(shape=(4,4,4),           dtype=float)
+        # self.dH_dangle3 = np.zeros(shape=(4,4,4),           dtype=float)
+        # self.dG_int11   = np.zeros(shape=(4,4,4,4,4,4),     dtype=float)
+        # self.dH_int11   = np.zeros(shape=(4,4,4,4,4,4),     dtype=float)
+        # self.dG_int21   = np.zeros(shape=(4,4,4,4,4,4,4),   dtype=float)
+        # self.dH_int21   = np.zeros(shape=(4,4,4,4,4,4,4),   dtype=float)
+        # self.dG_int22   = np.zeros(shape=(4,4,4,4,4,4,4,4), dtype=float)
+        # self.dH_int22   = np.zeros(shape=(4,4,4,4,4,4,4,4), dtype=float)
+
+        self.dG_stack   = np.zeros(shape=tuple([4]*4), dtype=float)
+        self.dH_stack   = np.zeros(shape=tuple([4]*4), dtype=float)
+        self.dG_dangle5 = np.zeros(shape=tuple([4]*3), dtype=float)
+        self.dH_dangle5 = np.zeros(shape=tuple([4]*3), dtype=float)
+        self.dG_dangle3 = np.zeros(shape=tuple([4]*3), dtype=float)
+        self.dH_dangle3 = np.zeros(shape=tuple([4]*3), dtype=float)
+        self.dG_int11   = np.zeros(shape=tuple([4]*6), dtype=float)
+        self.dH_int11   = np.zeros(shape=tuple([4]*6), dtype=float)
+        self.dG_int21   = np.zeros(shape=tuple([4]*7), dtype=float)
+        self.dH_int21   = np.zeros(shape=tuple([4]*7), dtype=float)
+        self.dG_int22   = np.zeros(shape=tuple([4]*8), dtype=float)
+        self.dH_int22   = np.zeros(shape=tuple([4]*8), dtype=float)
 
 
 def readpar(paramfile):
@@ -280,25 +293,13 @@ def readpar(paramfile):
 
         if version == 1:
             while values:
+                nts = values[-2].replace(',','')
+                values = values[:4]
+                X = [convert[n] for n in nts]
+                params.dG_int22[ X[0], X[1], X[4], :, X[5], X[6], X[3], X[2] ] = values
                 line = next(readlines)
                 values = line.split()
-                # print values
-
-            # while 1:
-            #     nts = values[-2].split(',')
-            #     if nts[0] == 'NN' or nts[1] == 'NN' or nts[2] == 'N' or nts[3] == 'N':
-            #         pass
-            #     else:
-            #         values = values[1:5]
-            #         X = [convert[n] for n in "".join(nts)]
-            #         params.dG_int21[ X[0], X[1], X[4], :, X[5], X[3], X[2] ] = values
-            #     line = next(readlines)
-            #     values = line.split()
-            #     if not values:
-            #         break
-
         else: # version 2
-
             while values:
                 nts = values[1].replace('.','')
                 X = [convert[n] for n in "".join(nts)]
@@ -311,28 +312,22 @@ def readpar(paramfile):
 
         params.dG_int22 /= 100.0
 
-        print params.dG_int22[0,3,0,0,0,1,1,2]
+        # print params.dG_int22[0,3,0,0,0,1,1,2]
         # AAAC
         # UACG
 
-        print params.dG_int22[0,3,0,0,1,1,1,2]
+        # print params.dG_int22[0,3,0,0,1,1,1,2]
         # AACC
         # UACG
 
-        print params.dG_int22[0,3,0,2,2,2,1,2]
+        # print params.dG_int22[0,3,0,2,2,2,1,2]
+        # assert params.dG_int22[0,3,0,2,2,2,1,2]
         # AAGC
         # UGGG
 
-        print params.dG_int22[0,3,3,3,3,2,1,2]
+        # print params.dG_int22[0,3,3,3,3,2,1,2]
         # AUUC
         # UUGG
-
-        memory = 0.0
-        for attr in dir(params):
-            if not attr.startswith('__'):
-                memory += getattr(params,attr).nbytes
-        print memory
-
 
         # ========================================================================
         # TLOOP
