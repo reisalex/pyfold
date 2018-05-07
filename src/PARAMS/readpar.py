@@ -17,21 +17,12 @@ basepairs = [ (1,2), (2,1), (2,3), (3,2), (0,3), (3,0) ]
 
 class FreeEnergyParameters:
     def __init__(self):
-        # self.dG_stack   = np.zeros(shape=(4,4,4,4),         dtype=float)
-        # self.dH_stack   = np.zeros(shape=(4,4,4,4),         dtype=float)
-        # self.dG_dangle5 = np.zeros(shape=(4,4,4),           dtype=float)
-        # self.dH_dangle5 = np.zeros(shape=(4,4,4),           dtype=float)
-        # self.dG_dangle3 = np.zeros(shape=(4,4,4),           dtype=float)
-        # self.dH_dangle3 = np.zeros(shape=(4,4,4),           dtype=float)
-        # self.dG_int11   = np.zeros(shape=(4,4,4,4,4,4),     dtype=float)
-        # self.dH_int11   = np.zeros(shape=(4,4,4,4,4,4),     dtype=float)
-        # self.dG_int21   = np.zeros(shape=(4,4,4,4,4,4,4),   dtype=float)
-        # self.dH_int21   = np.zeros(shape=(4,4,4,4,4,4,4),   dtype=float)
-        # self.dG_int22   = np.zeros(shape=(4,4,4,4,4,4,4,4), dtype=float)
-        # self.dH_int22   = np.zeros(shape=(4,4,4,4,4,4,4,4), dtype=float)
-
         self.dG_stack   = np.zeros(shape=tuple([4]*4), dtype=float)
         self.dH_stack   = np.zeros(shape=tuple([4]*4), dtype=float)
+        self.dG_stackh  = np.zeros(shape=tuple([4]*4), dtype=float)
+        self.dH_stackh  = np.zeros(shape=tuple([4]*4), dtype=float)
+        self.dG_stacki  = np.zeros(shape=tuple([4]*4), dtype=float)
+        self.dH_stacki  = np.zeros(shape=tuple([4]*4), dtype=float)
         self.dG_dangle5 = np.zeros(shape=tuple([4]*3), dtype=float)
         self.dH_dangle5 = np.zeros(shape=tuple([4]*3), dtype=float)
         self.dG_dangle3 = np.zeros(shape=tuple([4]*3), dtype=float)
@@ -91,6 +82,84 @@ def readpar(paramfile):
                 params.dH_stack[ XY[0], XY[1], WZ[1], WZ[0] ] = values[j]
 
         params.dH_stack /= 100.0
+
+        # ===============================================================
+        # TSTACKH
+        # Stacking interaction of the 2 nt over a closing bp of a hairpin loop
+        # 5' (1) A X (3) 3' LOOP!
+        # 3' (2) U Y (4) 5' LOOP!
+
+        # mismatch_hairpin
+        # mismatch_hairpin_enthalpies
+
+        while current != '# mismatch_hairpin':
+            current = next(readlines)
+            continue
+
+        for i in xrange(6):
+            for j in xrange(-1,4):
+                line = next(readlines)
+                if j == -1:
+                    continue
+                values = map(num,line.split()[1:5])
+                XY = basepairs[i]
+                params.dG_stackh[ XY[0], XY[1],j, : ] = values
+
+        params.dG_stackh /= 100.0
+
+        while current != '# mismatch_hairpin_enthalpies':
+            current = next(readlines)
+            continue
+
+        for i in xrange(6):
+            for j in xrange(-1,4):
+                line = next(readlines)
+                if j == -1:
+                    continue
+                values = map(num,line.split()[1:5])
+                XY = basepairs[i]
+                params.dH_stackh[ XY[0], XY[1],j, : ] = values
+
+        params.dH_stackh /= 100.0
+
+        # ===============================================================
+        # TSTACKI
+        # Stacking interaction of the 2 nt over a closing bp of a hairpin loop
+        # 5' (1) A X (3) 3' INTERNAL LOOP!
+        # 3' (2) U Y (4) 5' INTERNAL LOOP!
+
+        # mismatch_interior
+        # mismatch_interior_enthalpies
+
+        while current != '# mismatch_interior':
+            current = next(readlines)
+            continue
+
+        for i in xrange(6):
+            for j in xrange(-1,4):
+                line = next(readlines)
+                if j == -1:
+                    continue
+                values = map(num,line.split()[1:5])
+                XY = basepairs[i]
+                params.dG_stacki[ XY[0], XY[1],j, : ] = values
+
+        params.dG_stacki /= 100.0
+
+        while current != '# mismatch_interior_enthalpies':
+            current = next(readlines)
+            continue
+
+        for i in xrange(6):
+            for j in xrange(-1,4):
+                line = next(readlines)
+                if j == -1:
+                    continue
+                values = map(num,line.split()[1:5])
+                XY = basepairs[i]
+                params.dH_stacki[ XY[0], XY[1],j, : ] = values
+
+        params.dH_stacki /= 100.0
 
         # ===============================================================
         # TDANGLE5
@@ -312,23 +381,6 @@ def readpar(paramfile):
 
         params.dG_int22 /= 100.0
 
-        # print params.dG_int22[0,3,0,0,0,1,1,2]
-        # AAAC
-        # UACG
-
-        # print params.dG_int22[0,3,0,0,1,1,1,2]
-        # AACC
-        # UACG
-
-        # print params.dG_int22[0,3,0,2,2,2,1,2]
-        # assert params.dG_int22[0,3,0,2,2,2,1,2]
-        # AAGC
-        # UGGG
-
-        # print params.dG_int22[0,3,3,3,3,2,1,2]
-        # AUUC
-        # UUGG
-
         # ========================================================================
         # TLOOP
         # Tetra-loop bonus energies
@@ -340,20 +392,20 @@ def readpar(paramfile):
         # sequence   dG      dH
         # CAACGG     550     690
 
-        # # Add hexa- and tri- loops?
 
-        # ========================================================================
-        # TSTACK
-        # Stacking interaction of the 2 nt over a closing bp of a hairpin loop
-        # 5' (1) A X (3) 3' LOOP! <--- Double check loop position
-        # 3' (2) U Y (4) 5' LOOP!
+
         
-        # # stack
+
+
+
+
+
+
 
         # WRITE CODE TO ADJUST rna_turner1999.par BC `DEF` VALUES PRESENT
 
     # return params
 
 if __name__ == "__main__":
-    # readpar(paramfile='rna_turner1999.par')
-    readpar(paramfile='rna_turner2004.par')
+    readpar(paramfile='rna_turner1999.par')
+    # readpar(paramfile='rna_turner2004.par')
