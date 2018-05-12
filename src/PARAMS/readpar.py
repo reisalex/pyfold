@@ -33,7 +33,12 @@ class FreeEnergyParameters:
         self.dH_int21   = np.zeros(shape=tuple([4]*7), dtype=float)
         self.dG_int22   = np.zeros(shape=tuple([4]*8), dtype=float)
         self.dH_int22   = np.zeros(shape=tuple([4]*8), dtype=float)
-
+        self.dG_hloop   = np.zeros(30, dtype=float)
+        self.dH_hloop   = np.zeros(30, dtype=float)
+        self.dG_bulge   = np.zeros(30, dtype=float)
+        self.dH_bulge   = np.zeros(30, dtype=float)
+        self.dG_iloop   = np.zeros(30, dtype=float)
+        self.dH_iloop   = np.zeros(30, dtype=float)
 
 def readpar(paramfile):
 
@@ -382,6 +387,106 @@ def readpar(paramfile):
         params.dG_int22 /= 100.0
 
         # ========================================================================
+        # Destabilizing energy of a HAIRPIN loop
+
+        # skip lines before `# hairpin`
+        while current != '# hairpin':
+            current = next(readlines)
+            continue
+
+        line = next(readlines)
+        values = line.split()[1:]
+
+        elh = []
+        while values:
+            elh.extend(map(num,values))
+            line = next(readlines)
+            values = line.split()
+        params.dG_hloop[:] = elh
+        params.dG_hloop /= 100.0
+
+        while current != '# hairpin_enthalpies':
+            current = next(readlines)
+            continue
+
+        line = next(readlines)
+        values = line.split()[1:]
+
+        hlh = []
+        while values:
+            hlh.extend(map(num,values))
+            line = next(readlines)
+            values = line.split()
+        params.dH_hloop[:] = hlh
+        params.dH_hloop /= 100.0
+
+        # ========================================================================
+        # Destabilizing energy of a BULGE loop
+
+        while current != '# bulge':
+            current = next(readlines)
+            continue
+
+        line = next(readlines)
+        values = line.split()[1:]
+
+        elb = []
+        while values:
+            elb.extend(map(num,values))
+            line = next(readlines)
+            values = line.split()
+        params.dG_bulge[:] = elb
+        params.dG_bulge /= 100.0
+
+        while current != '# bulge_enthalpies':
+            current = next(readlines)
+            continue
+
+        line = next(readlines)
+        values = line.split()[1:]
+
+        hlb = []
+        while values:
+            hlb.extend(map(num,values))
+            line = next(readlines)
+            values = line.split()
+        params.dH_bulge[:] = hlb
+        params.dH_bulge /= 100.0
+
+        # ========================================================================
+        # Destabilizing energy of a INTERIOR loop
+
+        while current != '# interior':
+            current = next(readlines)
+            continue
+
+        line = next(readlines)
+        values = line.split()[1:]
+
+        eli = []
+        while values:
+            eli.extend(map(num,values))
+            line = next(readlines)
+            values = line.split()
+        params.dG_iloop[:] = eli
+        params.dG_iloop /= 100.0
+
+        while current != '# interior_enthalpies':
+            current = next(readlines)
+            continue
+
+        line = next(readlines)
+        values = line.split()[1:]
+
+        hli = []
+        while values:
+            hli.extend(map(num,values))
+            line = next(readlines)
+            values = line.split()
+        params.dH_iloop[:] = hli
+        params.dH_iloop /= 100.0
+
+        # ========================================================================
         # TLOOP
         # Tetra-loop bonus energies
         #    1 2 3 4 5 6
@@ -391,14 +496,6 @@ def readpar(paramfile):
         # # Tetraloops
         # sequence   dG      dH
         # CAACGG     550     690
-
-
-
-        
-
-
-
-
 
 
 
