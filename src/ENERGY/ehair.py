@@ -1,19 +1,26 @@
 """
-Module: DELTAG_HD (RNA,II,JJ,KK)
+Subroutine: EHAIR (ISEQ,I,J,N,EH)
 
-Description: Computes the difference in free energy of an RNA loop due
-             to a nucleotide diffusion along the helix i.e. the ii-jj
-             base pair will shift to either ii-kk or kk-jj. The energy
-             change is calculated using the empirical INN model.
+Purpose: Computes the energy of an RNA hairpin turn using the
+         empirical MFOLD 3.0 energy function.
+
+Method: Uses the MFOLD 3.0 energy function for RNA @ T=37 given by:
+
+        EH = E_entropic + E_stack + E_bonus + E_penalty
+
+              5' (I) X ... loop 3'
+              3' (J) Y ... loop 5'
+
+              NOTE: I < J
 
 Arguments:
 
-          RNA - Class containing information about the RNA fold and
-                the RNA sequence.
-           II - Nucleotide position of the 5' most nucleotide.
-           JJ - Nucleotide position of the 3' most nucleotide.
-           KK - Nucleotide position of the single-stranded nucleotiode
-                that either ii/jj in the base-pair ii-jj will swap with.
+         ISEQ - Array of length N containing the sequence
+                in numerical code (A=1,C=2,G=3,U=4)
+            I - Nucleotide position of the loop basepair 5'.
+            J - Nucleotide position of the loop basepair 3'.
+            N - Number of nucleotides in the sequence.
+           EH - (OUTPUT) MFOLD 3.0 energy of the hairpin sequence.
 
 History:
 Version     Date            Comment
