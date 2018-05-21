@@ -51,6 +51,13 @@ class FreeEnergyParameters:
         self.tetraloops = ['']*100
         self.hexaloops = ['']*100
 
+        # Other added parameters - see bottom of readpar()
+        self.dG_bonuses    = np.zeros(6, dtype=float)
+        self.dG_AU         = 0.0
+        self.dG_asym       = np.zeros(6, dtype=float)
+
+        self.dH_bonuses    = np.zeros(6, dtype=float)
+
 
 def readpar(paramfile):
 
@@ -487,10 +494,57 @@ def readpar(paramfile):
         params.hexaloops[i]   = values[0]
         params.dG_hexaloops[i] = num(values[1])
         params.dH_hexaloops[i] = num(values[2])
-        i += 1    
+        i += 1
 
-    print params.dG_tetraloops
-    print params.dH_tetraloops
+    # ========================================================================
+    # Asymmetry of internal loop penalty (Ninio equation)
+
+    raise Exception('Write import here')
+
+    # ========================================================================
+    # Hairpin loop bonuses and penalties
+
+    if paramfile == 'rna_turner1999.par':
+
+        params.dG_bonuses[0] = -0.8 # UU or GA first mismatch
+        params.dG_bonuses[1] =  0.0 # GG first mismatch
+        params.dG_bonuses[2] = -2.2 # special GU closure
+        params.dG_bonuses[3] =  1.4 # C3 loop
+        params.dG_bonuses[4] =  0.3 # All-C loop, A
+        params.dG_bonuses[5] =  1.6 # All-C loop, B
+
+        # values not provided on Turner website
+        # params.dH_bonuses[0] = # UU or GA first mismatch
+        # params.dH_bonuses[1] = # GG first mismatch
+        # params.dH_bonuses[2] = # special GU closure
+        # params.dH_bonuses[3] = # C3 loop
+        # params.dH_bonuses[4] = # All-C loop, A
+        # params.dH_bonuses[5] = # All-C loop, B
+
+        params.dG_AU      = 0.5
+        params.dG_asym[:] = 0.5
+        params.dG_maxasym = 3.0
+
+    elif paramfile == 'rna_turner20004.par':
+
+        params.dG_bonuses[0] = -0.9 # UU or GA first mismatch
+        params.dG_bonuses[1] = -0.8 # GG first mismatch
+        params.dG_bonuses[2] = -2.2 # special GU closure
+        params.dG_bonuses[3] =  1.5 # C3 loop
+        params.dG_bonuses[4] =  0.3 # All-C loop, A
+        params.dG_bonuses[5] =  1.6 # All-C loop, B
+
+        params.dH_bonuses[0] = -5.8 # UU or GA first mismatch
+        params.dH_bonuses[1] =  0.0 # GG first mismatch
+        params.dH_bonuses[2] = -14.8 # special GU closure
+        params.dH_bonuses[3] =  18.6 # C3 loop
+        params.dH_bonuses[4] =  3.4 # All-C loop, A
+        params.dH_bonuses[5] =  17.6 # All-C loop, B
+
+        params.dG_AU      = 0.7
+        params.dG_asym[:] = 0.6
+        params.dG_maxasym = 3.0
+
 
     return params
 

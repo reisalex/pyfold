@@ -1,8 +1,9 @@
 '''
-Subroutine: TSTACK (LIST,ES)
+Subroutine: TSTACKI (LIST,ES)
 
-Purpose: Performs a table lookup for the stacking interaction
-         between two basepairs in a helix.
+Purpose: Performs a table lookup for the stacking interaction of
+         the two nucleotides positioned over a closing basepair in
+         an internal loop.
 
 Method: Uses the MFOLD 3.0 energy function table for RNA @ T=37.
 
@@ -12,8 +13,8 @@ Arguments:
                 numerical code (A=1,C=2,G=3,U=4) for the
                 following locations:
 
-                5' (1) A X (3) 3'
-                3' (2) U Y (4) 5'
+                5' (1) A X (3) 3' INTERNAL LOOP
+                3' (2) U Y (4) 5' INTERNAL LOOP
 
                 where LIST(1) = letter code for position 1 etc.
 
@@ -36,10 +37,10 @@ Author(s): Alex Reis
            Copyright (c) 2015 (Please Refer to LICENCE)
 '''
 
-def TSTACK(ilist,es):
+def TSTACKI(ilist,es):
 
     # INTEGERS
-    # ilist(4),i,i1,i2,i3,4
+    # ilist(4),i,i1,i2,i3,i4
 
     # REAL
     # es
@@ -49,6 +50,6 @@ def TSTACK(ilist,es):
     i3 = ilist[2]
     i4 = ilist[3]
 
-    es += params.dG_stack[i1,i2,i3,i4]
+    es += params.dG_stacki[i1,i2,i3,i4]
 
     return es

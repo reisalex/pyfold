@@ -41,25 +41,71 @@ def EHAIR(iseq,i,j,n):
     # INTEGER
     # i,j,n
     # iseq(n)
-    # ilist(6)
+    # ilist(8)
     # k,ic,nl
 
     # REAL
-    # x,c,elh(30)
+    # x,c
     # eh
-
-    elh = [0.00e0,0.00e0,5.70e0,5.60e0,5.60e0,
-           5.40e0,5.90e0,5.60e0,6.40e0,6.50e0,
-           6.60e0,6.70e0,6.80e0,6.90e0,6.90e0,
-           7.00e0,7.10e0,7.10e0,7.20e0,7.20e0,
-           7.30e0,7.30e0,7.40e0,7.40e0,7.50e0,
-           7.50e0,7.50e0,7.60e0,7.60e0,7.70e0]
 
     eh = 0.0e0
 
     nl = j - i - 1
 
     c = 1.750e0 / float(beta)
+
+    #=== Tables of specific hairpin loops ===#
+
+    #=== Triloop Bonus ===#
+
+    if ( nl == 3 ):
+
+        ilist[0] = iseq[i]
+        ilist[1] = iseq[i+1]
+        ilist[2] = iseq[i+2]
+        ilist[3] = iseq[i+3]
+        ilist[4] = iseq[i+4]
+
+        eh = TLOOP(ilist,eh,nl)
+
+        if eh != 0.0e0:
+            return eh
+
+    #=== Tetraloop Bonus ===#
+
+    elif ( nl == 4 ):
+
+        ilist[0] = iseq[i]
+        ilist[1] = iseq[i+1]
+        ilist[2] = iseq[i+2]
+        ilist[3] = iseq[i+3]
+        ilist[4] = iseq[i+4]
+        ilist[5] = iseq[i+5]
+
+        eh = TLOOP(ilist,eh,nl)
+
+        if eh != 0.0e0:
+            return eh
+
+    #=== Hexaloop Bonus ===#
+
+    elif ( nl == 6 ):
+
+        ilist[0] = iseq[i]
+        ilist[1] = iseq[i+1]
+        ilist[2] = iseq[i+2]
+        ilist[3] = iseq[i+3]
+        ilist[4] = iseq[i+4]
+        ilist[5] = iseq[i+5]
+        ilist[6] = iseq[i+6]
+        ilist[7] = iseq[i+7]
+
+        eh = TLOOP(ilist,eh,nl)
+
+        if eh != 0.0e0:
+            return eh
+
+    # If loop is not present in a table:
 
     #=== TERM 1 --> Entropic Term ===#
 
@@ -68,13 +114,11 @@ def EHAIR(iseq,i,j,n):
         x = float(nl) / 30.0e0
         x = c * math.log(x)
 
-        eh = elh[30] + x
+        eh = params.dG_hloop[30] + x
 
     else:
 
-        eh = elh[nl]
-
-    #endif
+        eh = params.dG_hloop[nl]
 
     #=== TERM 2 --> Stacking Energy ===#
 
@@ -90,38 +134,18 @@ def EHAIR(iseq,i,j,n):
 
         eh = TSTACKH(ilist,eh)
 
-    #endif
-
     #=== TERM 3 ---> Bonuses ===#
-
-    #=== Tetra-loop Bonus ===#
-
-    if ( nl == 4 ):
-
-        ilist[0] = iseq[i]
-        ilist[1] = iseq[i+1]
-        ilist[2] = iseq[i+2]
-        ilist[3] = iseq[i+3]
-        ilist[4] = iseq[i+4]
-        ilist[5] = iseq[i+5]
-
-        eh = TLOOP(ilist,eh)
-
-    #endif
 
     #=== GGG Hairpin Bonus ===#
 
-    if ( iseq[i] == 3 and iseq[j] == 4 ):
+    if ( iseq[i] == 2 and iseq[j] == 3 ):
 
         ic = 0
 
-        for k in range(max(1,i-2),i):
-            if ( iseq[k] == 3 ): ic += 1
-        #endfor
+        for k in xrange(max(0,i-2),i):
+            if ( iseq[k] == 2 ): ic += 1
 
-        if ( ic == 3 ): eh -= 2.20e0
-
-    #endif
+        if ( ic == 2 ): eh -= params.dG_bonuses[2]
 
     #=== TERM 4 --> Penalties ===#
 
@@ -129,30 +153,24 @@ def EHAIR(iseq,i,j,n):
 
     ic = 0
 
-    for k in range(i+1,j-1):
-        if ( iseq[k] == 2 ): ic += 1
-    #endfor
+    for k in xrange(i+1,j):
+        if ( iseq[k] == 1 ): ic += 1
 
     if ( ic == nl ):
         if ( nl == 3 ):
-            eh += 1.40e0
+            eh += params.dG_bonuses[3]
         else:
-            eh += 1.60e0
-            eh += 0.30e0 * float(ic)
-        #endif
-    #endif
+            eh += params.dG_bonuses[5]
+            eh += params.dG_bonuses[4] * float(ic)
 
     #=== A-U / G-U closing a Tri-loop ===#
 
     if ( nl == 3 ):
 
-        if ( iseq[i] == 4 ): eh += eau
-        if ( iseq[j] == 4 ): eh += eau
+        if ( iseq[i] == 3 ): eh += eau
+        if ( iseq[j] == 3 ): eh += eau
 
-    #endif
+    # ^I think the AU penalty applies regardless of whether the
+    # hairpin loop is a triloop or not
 
     return eh
-        
-            
-
-

@@ -15,7 +15,7 @@ Author(s): Alex Reis
            Copyright (c) 2017 (Please refer to LICENCE)
 """
 
-#Global
+# Global
 # global pnuc,iwc,eaup
 # global beta
 # global gcons,temp
@@ -47,22 +47,4 @@ em = 10.10e0
 eh = -0.30e0
 es = -0.30e0
 eau = 0.50e0
-
-
-class EnergyParameters(object):
-
-    # available_files = [   "dna_mathews1999.par",
-    #                        "rna_turner1999.par",
-    #                       "dna_mathews2004.par",
-    #                        "rna_turner2004.par",
-    #                    "rna_andronescu2007.par"]
-
-    temp = 310.15 # default temperature (37.0 C)
-
-    def __init__(self):
-        pass
-
-    def set_temp(self,temperature):
-        self.temp = temperature + 273.15 # convert to Kelvin
-
 

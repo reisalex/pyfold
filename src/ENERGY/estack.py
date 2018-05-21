@@ -54,6 +54,6 @@ def ESTACK(iseq,i,j,ip,jp,n):
     ilist[2] = iseq[ip]
     ilist[3] = iseq[jp]
 
-    es = TSTACK(ilist)
+    es = TSTACK(ilist,es)
 
     return es
