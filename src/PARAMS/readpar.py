@@ -53,10 +53,14 @@ class FreeEnergyParameters:
 
         # Other added parameters - see bottom of readpar()
         self.dG_bonuses    = np.zeros(6, dtype=float)
+        self.MBLmodel      = 0
+        self.MBLinit       = np.zeros(4, dtype=float)
         self.dG_AU         = 0.0
+        self.dG_AUP        = np.zeros(shape=tuple(4,4), dtype=float)
         self.dG_asym       = np.zeros(6, dtype=float)
 
         self.dH_bonuses    = np.zeros(6, dtype=float)
+
 
 
 def readpar(paramfile):
@@ -506,6 +510,7 @@ def readpar(paramfile):
 
     if paramfile == 'rna_turner1999.par':
 
+        # hairpin loop bonuses
         params.dG_bonuses[0] = -0.8 # UU or GA first mismatch
         params.dG_bonuses[1] =  0.0 # GG first mismatch
         params.dG_bonuses[2] = -2.2 # special GU closure
@@ -521,12 +526,28 @@ def readpar(paramfile):
         # params.dH_bonuses[4] = # All-C loop, A
         # params.dH_bonuses[5] = # All-C loop, B
 
+        # Internal Loops
         params.dG_AU      = 0.5
         params.dG_asym[:] = 0.5
         params.dG_maxasym = 3.0
 
+        # terminal mismatches
+        # not used b/c internal stack
+        # energies have been tabulated
+        # AG = -1.1
+        # GA = -1.1
+        # GG =  0.0
+        # UU = -0.7
+
+        # Multi Branch Loops (MBL)
+        params.MBLmodel      = 1
+        params.MBLinit[0] = 10.1 # a
+        params.MBLinit[1] = -0.3 # b
+        params.MBLinit[2] = -0.3 # c
+
     elif paramfile == 'rna_turner20004.par':
 
+        # Hairpin Loops
         params.dG_bonuses[0] = -0.9 # UU or GA first mismatch
         params.dG_bonuses[1] = -0.8 # GG first mismatch
         params.dG_bonuses[2] = -2.2 # special GU closure
@@ -541,10 +562,31 @@ def readpar(paramfile):
         params.dH_bonuses[4] =  3.4 # All-C loop, A
         params.dH_bonuses[5] =  17.6 # All-C loop, B
 
+        # Internal Loops
         params.dG_AU      = 0.7
         params.dG_asym[:] = 0.6
         params.dG_maxasym = 3.0
 
+        # terminal mismatches
+        # not used b/c internal stack
+        # energies have been tabulated
+        # AG = -0.8
+        # GA = -1.0
+        # GG = -1.2
+        # UU = -0.7
+
+        # Multi Branch Loops (MBL)
+        params.MBLmodel      = 2
+        params.MBLinit[0] =  9.25 # a
+        params.MBLinit[1] =  0.91 # b
+        params.MBLinit[2] = -0.63 # c
+        params.MBLinit[3] =  3.14 # dG_strain
+
+
+    self.dG_AUP[0][3] = params.dG_AU
+    self.dG_AUP[3][0] = params.dG_AU
+    self.dG_AUP[2][3] = params.dG_AU
+    self.dG_AUP[3][2] = params.dG_AU
 
     return params
 

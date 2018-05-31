@@ -179,13 +179,30 @@ def EBULGE(iseq,i,j,ip,jp,n):
 
     elif ibul == 6:
 
-        # 5' (i) A X . . G (ip) 3'
-        # 3' (j) U Y . . C (jp) 5'
+        # 5' (i) A X .. G (ip) 3'
+        # 3' (j) U Y .. C (jp) 5'
 
         ilist[0] = iseq[i]
         ilist[1] = iseq[j]
         ilist[2] = iseq[i+1]
         ilist[3] = iseq[j-1]
+
+        #=== GAIL Rule ===#
+
+        if ( imin == 1 and imax > 2 ):
+
+            ilist[2] = 0
+            ilist[3] = 0
+
+        eb = TSTACKI(ilist,eb)
+
+        # 5' (i) A .. X G (ip) 3'
+        # 3' (j) U .. Y C (jp) 5'
+
+        ilist[0] = iseq[jp]
+        ilist[1] = iseq[ip]
+        ilist[2] = iseq[jp+1]
+        ilist[3] = iseq[ip-1]
 
         #=== GAIL Rule ===#
 

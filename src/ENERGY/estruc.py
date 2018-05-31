@@ -48,9 +48,9 @@ def ESTRUC(iseq,ibsp,n):
     #=== Find Loops ===#
 
     nl = 1
-    loop[0] = n
+    loop[0] = n - 1
 
-    for i in range(0,n):
+    for i in xrange(0,n):
 
         j = ibsp[i]
 
@@ -60,11 +60,8 @@ def ESTRUC(iseq,ibsp,n):
             jp = j - 1
 
             if ( ibsp[ip] != jp ):
-                nl += 1
                 loop[nl] = i
-            #endif
-        #endif
-    #endfor
+                nl += 1
 
     #=== Compute Energy ===#
 
@@ -73,7 +70,7 @@ def ESTRUC(iseq,ibsp,n):
         i = loop[il]
         j = ibsp[i]
 
-        if ( i == n ): j = 1
+        if ( i == n - 1 ): j = 0
 
         #=== Loop Energy ===#
 
@@ -86,9 +83,9 @@ def ESTRUC(iseq,ibsp,n):
         ip = i - 1
         jp = j + 1
 
-        if ( ip < 1 ): continue
-        if ( jp > n ): continue
-        if ( i  > j ): continue
+        if ( ip < 0   ): continue
+        if ( jp > n-1 ): continue
+        if ( i  > j   ): continue
 
         while ( ibsp[ip] == jp ):
 
@@ -102,11 +99,8 @@ def ESTRUC(iseq,ibsp,n):
             ip -= 1
             jp += 1
 
-            if ( ip < 1 ): break
-            if ( jp > n ): break
-
-        #endwhile
-    #endfor
+            if ( ip < 0   ): break
+            if ( jp > n-1 ): break
 
     return e
 
