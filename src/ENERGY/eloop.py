@@ -25,8 +25,8 @@ Arguments:
                  in numerical code (A=1,C=2,G=3,U=4)
           IBSP - Array of dimension (N) containing the information
                  on base pairs in the RNA fold.
-                 IBSP(i) = j [i base pairs with j]
-                 IBSP(i) = 0 [i is single stranded]
+                 IBSP(i) = j  [i base pairs with j]
+                 IBSP(i) = -1 [i is single stranded]
              I - Nucleotide position of the 5' most nucleotide.
              J - Nucleotide position of the 3' most nucleotide.
              N - Number of nucleotides in the sequence.
@@ -79,7 +79,7 @@ def ELOOP(iseq,ibsp,i,j,n):
     while ( k <= ke ):
 
         # unpaired nt
-        if ( ibsp[k] == 0 ):
+        if ( ibsp[k] == -1 ):
             ins += 1
 
         # new helix in loop
@@ -108,7 +108,7 @@ def ELOOP(iseq,ibsp,i,j,n):
     elif ( nh == 2 and iloop == 1 ):
 
         ip = i + 1
-        while ( ibsp[ip] == 0 ):
+        while ( ibsp[ip] == -1 ):
             ip += 1
 
         jp = ibsp[ip]
@@ -132,7 +132,7 @@ def ELOOP(iseq,ibsp,i,j,n):
             k = ip + 1
             ilast = k
 
-            if ( k >= 0 and k <= n-1 ) and ( ibsp[k] == 0 ):
+            if ( k >= 0 and k <= n-1 ) and ( ibsp[k] == -1 ):
                 e3 = EDANGLE(iseq,ip,jp,k,n)
 
             if ( params.MBLmodel == 2 ):
@@ -164,7 +164,7 @@ def ELOOP(iseq,ibsp,i,j,n):
 
         while ( k <= ke ):
 
-            if ( ibsp[k] != 0 ):
+            if ( ibsp[k] != -1 ):
 
                 ip = k
                 jp = ibsp[k]
@@ -173,7 +173,7 @@ def ELOOP(iseq,ibsp,i,j,n):
 
                 e5 = 0.0e0
 
-                if ( kp >= 0 and kp <= n-1 ) and ( ibsp[kp] == 0 ):
+                if ( kp >= 0 and kp <= n-1 ) and ( ibsp[kp] == -1 ):
                     e5 = EDANGLE(iseq,ip,jp,kp,n)
 
                 # pick 3' (H1) or 5' (H2) dangle if same nt
@@ -189,7 +189,7 @@ def ELOOP(iseq,ibsp,i,j,n):
 
                 e3 = 0.0e0
 
-                if ( kp >= 0 and kp <= n-1 ) and ( ibsp[kp] == 0 ):
+                if ( kp >= 0 and kp <= n-1 ) and ( ibsp[kp] == -1 ):
                     e3 = EDANGLE(iseq,ip,jp,kp,n)
 
                 if ( k != ke ):

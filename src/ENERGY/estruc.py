@@ -14,8 +14,8 @@ Arguments:
                  in numerical code (A=1,C=2,G=3,U=4)
           IBSP - Array of dimension (N) containing the information
                  on base pairs in the RNA fold.
-                 IBSP(i) = j [i base pairs with j]
-                 IBSP(i) = 0 [i is single stranded]
+                 IBSP(i) = j  [i base pairs with j]
+                 IBSP(i) = -1 [i is single stranded]
              N - Number of nucleotides in the sequence.
 
 History:
