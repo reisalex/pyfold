@@ -122,7 +122,7 @@ def ELOOP(iseq,ibsp,i,j,n):
         if ( iloop == 0 ):
 
             k = ks
-            ilast = 0
+            # ilast = 0 # not used
 
         elif ( iloop == 1 ):
 
@@ -138,6 +138,7 @@ def ELOOP(iseq,ibsp,i,j,n):
             if ( params.MBLmodel == 2 ):
 
                 # calculate average asymmetry of MBL
+                asym = 0.0e0
                 for indx in xrange(1,nh+1):
                     asym += float( abs( lns[indx] - lns[indx-1] ) )
                 asym /= float(nh)
@@ -150,7 +151,7 @@ def ELOOP(iseq,ibsp,i,j,n):
                 if (nh == 3) and (ns < 2):
                     el += params.MBLinit[4] # dG_strain
 
-            elif ( ns < 6 ):
+            elif ( ns <= 6 ):
                 el  = params.MBLinit[0]               # a, (em)
                 el += params.MBLinit[1] * float(ns)   # b, (es)
                 el += params.MBLinit[2] * float(nh)   # c, (eh)

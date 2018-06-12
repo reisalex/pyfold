@@ -2,106 +2,120 @@
 Subroutine: LOOP_INIT (RNA)
 
 Description: Initializes the data structures (loop elements) required
-       for RNA kinetics.
+             for RNA kinetics.
 
 Arguments:
-    
-    RNA - Class structure containing information on the
-        RNA secondary structure and possible reactions
+        
+        RNA - Class structure containing information on the
+                RNA secondary structure and possible reactions
 
 History:
 Version     Date            Comment
 --------    -------         --------------------
-      09/28/2017      Original Code
+            09/28/2017      Original Code
 
 Dependencies:
 
 Author(s): Alex Reis
-       Copyright (c) 2017 (Please refer to LICENCE)
+             Copyright (c) 2017 (Please refer to LICENCE)
 """
 
 def LOOP_INIT(rna):
 
-  # VARIABLES
-  
-  # INTEGERS
-  # i,j,n,nl,ns,nh
-  # ip,jp,kp,ks,ke
-  # nsum
-
-  #=== Initialize RNA Data ===#
-
-  n = rna.n
-  rna.CLEAR_LOOPS()
-
-  #=== Find loops ===#
-
-  nl = 1
-  rna.loop[1] = n
-
-  for i in range(1,n):
-
-    j = rna.ibsp[i]
-
-    if ( j > i ):
-
-      ip = i + 1
-      jp = j - 1
-
-      if ( rna.ibsp[ip] != jp ):
-        nl += 1
-        rna.loop(nl) = i
-
-  rna.nl = nl
-
-  #=== Make links ===#
-
-  for i in range(1,nl):
-
-    ip = rna.loop[i]
-    jp = rna.ibsp[ip]
-
-    if ( ip == n ): jp = 1
+    # VARIABLES
     
-    rna.link[ip] = i
+    # INTEGERS
+    # i,j,n,nl,ns,nh
+    # ip,jp,kp,ks,ke
+    # nsum
 
-    if ( ip < jp ):
-      ks = ip + 1
-      ke = jp
-      nh = 1
-      ns = 0
-    else:
-      ks = jp
-      ke = ip
-      nh = 0
-      ns = 0
+    #=== Initialize RNA Data ===#
 
-    kp = ks
+    n = rna.n
+    rna.CLEAR_LOOPS()
 
-    while ( kp <= ke ):
+    #=== Find loops ===#
 
-      if ( rna.ibsp[kp] > kp ): nh += 1
-      if ( rna.ibsp[kp] == 0 ): ns += 1
+    nl = 1
+    rna.loop[1] = n
 
-      if ( rna.ibsp[kp] > kp ):
-        kp = rna.ibsp[kp]
-        rna.link[kp] = i
-      else:
-        kp += 1
+    for i in range(1,n):
 
-    rna.nhlx[i] = nh
-    rna.nsgl[i] = ns
+        j = rna.ibsp[i]
 
-  # Compute size of partial sum table
+        if ( j > i ):
 
-  nsum = 2
-  while ( nsum < nl ):
-    nsum *= 2
-  rna.nsum = nsum
+            ip = i + 1
+            jp = j - 1
 
-  # Compute reactions for loops
-  
-  for i in range(1,nl):
-    rna.LOOP_REAC(i)
+            if ( rna.ibsp[ip] != jp ):
+                nl += 1
+                rna.loop[nl] = i
 
-  return rna
+    rna.nl = nl
+
+    #=== Make links ===#
+
+    for i in range(1,nl):
+
+        ip = rna.loop[i]
+        jp = rna.ibsp[ip]
+
+        if ( ip == n ): jp = 1
+        
+        rna.link[ip] = i
+
+        if ( ip < jp ):
+            ks = ip + 1
+            ke = jp
+            nh = 1
+            ns = 0
+        else:
+            ks = jp
+            ke = ip
+            nh = 0
+            ns = 0
+
+        ins = 0
+        kp = ks
+
+        # modified to collect loop asymmetry
+        while ( kp <= ke ):
+
+            # unpaired nt
+            if ( rna.ibsp[kp] == -1 ):
+                ins += 1
+                kp += 1
+
+            # new helix in loop
+            elif ( ibsp[kp] >  kp ):
+                rna.lns[i][nh] = ins
+                ns += ins
+                ins = 0
+                nh += 1
+
+                # skip to closing bp of current nt
+                kp = rna.ibsp[kp]
+                rna.link[kp] = i
+                    
+
+        rna.lns[i][0]  = ins # for-loop simplicity
+        rna.lns[i][nh] = ins
+        ns += ins
+
+        rna.nhlx[i] = nh
+        rna.nsgl[i] = ns
+
+    # Compute size of partial sum table
+
+    nsum = 2
+    while ( nsum < nl ):
+        nsum *= 2
+    rna.nsum = nsum
+
+    # Compute reactions for loops
+    
+    for i in range(1,nl):
+        rna.LOOP_REAC(i)
+
+    return rna
