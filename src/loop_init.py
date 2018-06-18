@@ -88,16 +88,18 @@ def LOOP_INIT(rna):
                 kp += 1
 
             # new helix in loop
-            elif ( ibsp[kp] >  kp ):
+            elif ( ibsp[kp] > kp ):
                 rna.lns[i][nh] = ins
                 ns += ins
                 ins = 0
                 nh += 1
 
+                # track helix ip-jp in MBLs
+                rna.htrack[i][kp] = nh
+
                 # skip to closing bp of current nt
                 kp = rna.ibsp[kp]
                 rna.link[kp] = i
-                    
 
         rna.lns[i][0]  = ins # for-loop simplicity
         rna.lns[i][nh] = ins
