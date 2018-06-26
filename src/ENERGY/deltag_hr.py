@@ -33,7 +33,7 @@ def DELTAG_HR(rna,ii,jj):
     # ii,jj
     # i,j,k,n,ip,jp,hs,js
     # nh,ns,mh,ms,lh,ls
-    # iloop, indx
+    # iloop, indx, lnsf, hi, hjmp, lnsf, i1
 
     # DOUBLE PRECISION
     # dg
@@ -60,13 +60,13 @@ def DELTAG_HR(rna,ii,jj):
 
     if ( i > j ):
         iloop = 0
-        i = 1
-        j = n
-    #endif
+        i = 0
+        j = n-1
 
     if ( rna.ibsp[ii+1] != jj-1 ):
 
         k  = rna.link[ii]
+
         mh = rna.nhlx[k]
         ms = rna.nsgl[k]
 
@@ -75,9 +75,43 @@ def DELTAG_HR(rna,ii,jj):
         mh = 2
         ms = 0
 
-    #endif
-
     #=== Final Loop Size ===#
+
+    lnsf = rna.lns[indx][:]
+    hi = rna.htrack[indx][ii]
+
+    if ( mh == 1 ):
+
+        lnsf[hi-1] += 2 + ms + lnsf[hi]
+
+        for i1 in xrange(hi,nh):
+            lnsf[i1] = lnsf[i1+1]
+
+    elif ( mh == 2 and ms > 0 ):
+
+        lnsf[hi-1] += rna.lns[k][1] + 1
+        lnsf[hi]   += rna.lns[k][0] + 1
+
+    elif ( mh > 2 ):
+
+        hjmp = 0
+        
+        # add helix parts from loop-indx
+        for i1 in xrange(1,nh+1):
+            if i1 == hi: hjmp = mh - 2
+            lnsf[i1+hjmp] = lnsf[i1]
+
+        # add helix parts from loop-k
+        lnsf[hi-1]    += 1 + rna.lns[k][1]
+        lnsf[hi+hjmp] += 1 + rna.lns[k][0]
+
+        for i1 in xrange(2,mh):
+            lnsf[hi+i1-hjmp] = rna.lnsf[k][i1]
+
+    else: # mh = 2 and ms = 0
+
+        lnsf[hi-1] += 1
+        lnsf[hi]   += 1
 
     lh = nh + mh - 2
     ls = ns + ms + 2
