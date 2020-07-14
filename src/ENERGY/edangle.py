@@ -44,8 +44,8 @@ def EDANGLE(iseq,i,j,k,n):
 
     ed = 0.0e0
 
-    if ( k < 1 ) return ed
-    if ( k > n ) return ed
+    if ( k < 0 ): return ed
+    if ( k > n ): return ed
 
     if ( k == i+1 ):
 
@@ -58,9 +58,7 @@ def EDANGLE(iseq,i,j,k,n):
 
         ed = TDANGLE3(ilist)
 
-    #endif
-
-    if ( k == j-1 ):
+    elif ( k == j-1 ):
 
         # 5' (i) A       3'
         # 3' (j) U X (k) 5'        
@@ -71,9 +69,7 @@ def EDANGLE(iseq,i,j,k,n):
 
         ed = TDANGLE5(ilist)
 
-    #endif
-
-    if ( k == j+1 ):
+    elif ( k == j+1 ):
 
         # 5'       A (i) 3'
         # 3' (k) X U (j) 5'
@@ -84,9 +80,7 @@ def EDANGLE(iseq,i,j,k,n):
 
         ed = TDANGLE3(ilist)
 
-    #endif
-
-    if ( k == i-1 ):
+    elif ( k == i-1 ):
 
         # 5' (k) X A (i) 3'
         # 3'       U (j) 5'
@@ -96,7 +90,5 @@ def EDANGLE(iseq,i,j,k,n):
         ilist[2] = iseq[k]
 
         ed = TDANGLE5(ilist)
-
-    #endif
 
     return ed

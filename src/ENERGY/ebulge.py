@@ -47,51 +47,32 @@ def EBULGE(iseq,i,j,ip,jp,n):
 
     # REAL
     # eb
-    # x,c,f(4),elb(30),eli(30)
-    
-
-    #=== MOVE THESE DATA TABLES TO DATABASE FOR ENERGY PARAMS ===#
-
-    f = [0.50e0,0.50e0,0.50e0,0.50e0]
-
-    elb = [3.80e0,2.80e0,3.20e0,3.60e0,4.00e0,
-           4.40e0,4.60e0,4.70e0,4.80e0,4.90e0,
-           5.00e0,5.10e0,5.20e0,5.30e0,5.40e0,
-           5.40e0,5.50e0,5.50e0,5.60e0,5.70e0,
-           5.70e0,5.80e0,5.80e0,5.80e0,5.90e0,
-           5.90e0,6.00e0,6.00e0,6.00e0,6.10e0]
-
-    eli = [0.00e0,0.00e0,0.00e0,1.70e0,1.80e0,
-           2.00e0,2.20e0,2.30e0,2.40e0,2.50e0,
-           2.60e0,2.70e0,2.80e0,2.90e0,3.00e0,
-           3.00e0,3.10e0,3.10e0,3.20e0,3.30e0,
-           3.30e0,3.40e0,3.40e0,3.40e0,3.50e0,
-           3.50e0,3.60e0,3.60e0,3.60e0,3.70e0]
+    # x,c,f(4)
 
     eb = 0.0e0
 
-    n1 = ip - i - 1
-    n2 = j - jp - 1
+    n1 = ip - i - 1 # number of nt on 5' side of bulge/int loop
+    n2 = j - jp - 1 # number of nt on 3' side of bulge/int loop
 
-    nt = n1 + n2
-    na = abs(n1-n2)
+    nt = n1 + n2 # loop size
+    na = abs(n1-n2) # asymmetry
 
     imin = min(n1,n2)
     imax = max(n1,n2)
 
-    x = 1.750e0 / float(beta)
+    c = 1.750e0 / float(beta)
 
     #=== Get Bulge Type ===#
 
     ibul = 6
-    if ( n1 == 0 and n2 == 1 ): ibul = 0
-    if ( n1 == 1 and n2 == 0 ): ibul = 0
-    if ( n1 == 0 and n2 >= 2 ): ibul = 1
-    if ( n1 >= 2 and n2 == 0 ): ibul = 1
-    if ( n1 == 1 and n2 == 1 ): ibul = 2
-    if ( n1 == 1 and n2 == 2 ): ibul = 3
-    if ( n1 == 2 and n2 == 1 ): ibul = 4
-    if ( n1 == 2 and n2 == 2 ): ibul = 5
+    if   ( n1 == 0 and n2 == 1 ): ibul = 0
+    elif ( n1 == 1 and n2 == 0 ): ibul = 0
+    elif ( n1 == 0 and n2 >= 2 ): ibul = 1
+    elif ( n1 >= 2 and n2 == 0 ): ibul = 1
+    elif ( n1 == 1 and n2 == 1 ): ibul = 2
+    elif ( n1 == 1 and n2 == 2 ): ibul = 3
+    elif ( n1 == 2 and n2 == 1 ): ibul = 4
+    elif ( n1 == 2 and n2 == 2 ): ibul = 5
 
     #=== TERM 1 --> Entropic Term ===#
 
@@ -100,13 +81,13 @@ def EBULGE(iseq,i,j,ip,jp,n):
         x = float(nt) / 30.0e0
         x = c * math.log(x)
 
-        if ( ibul <= 1 ): eb = elb[30] + x
-        if ( ibul == 6 ): eb = eli[30] + x
+        if ( ibul <= 1 ): eb = params.dG_bulge[30] + x
+        if ( ibul == 6 ): eb = params.dG_iloop[30] + x
 
     else:
 
-        if ( ibul <= 1 ): eb = elb[nt]
-        if ( ibul == 6 ): eb = eli[nt]
+        if ( ibul <= 1 ): eb = params.dG_bulge[nt]
+        if ( ibul == 6 ): eb = params.dG_iloop[nt]
 
     #endif
 
@@ -122,7 +103,7 @@ def EBULGE(iseq,i,j,ip,jp,n):
         ilist[2] = iseq[ip]
         ilist[3] = iseq[jp]
 
-        eb = TSTACK(ilist)
+        eb = TSTACK(ilist,eb)
 
     elif ibul == 1:
 
@@ -131,10 +112,10 @@ def EBULGE(iseq,i,j,ip,jp,n):
 
         #=== Closing A-U / G-U Penalty ===#
 
-        if ( iseq[i]  == 4 ): eb += eau
-        if ( iseq[j]  == 4 ): eb += eau
-        if ( iseq[ip] == 4 ): eb += eau
-        if ( iseq[jp] == 4 ): eb += eau
+        if ( iseq[i]  == 4 ): eb += params.dG_AU
+        if ( iseq[j]  == 4 ): eb += params.dG_AU
+        if ( iseq[ip] == 4 ): eb += params.dG_AU
+        if ( iseq[jp] == 4 ): eb += params.dG_AU
 
     elif ibul == 2:
 
@@ -148,7 +129,7 @@ def EBULGE(iseq,i,j,ip,jp,n):
         ilist[4] = iseq[ip]
         ilist[5] = iseq[jp]
 
-        eb = TINT11(ilist)
+        eb = TINT11(ilist,eb)
 
     elif ibul == 3:
 
@@ -158,12 +139,12 @@ def EBULGE(iseq,i,j,ip,jp,n):
         ilist[0] = iseq[i]
         ilist[1] = iseq[j]
         ilist[2] = iseq[i+1]
-        ilist[3] = iseq[ip-1]
-        ilist[4] = iseq[ip-2]
-        ilist[5] = iseq[j]
-        ilist[6] = iseq[i]
+        ilist[3] = iseq[j-1]
+        ilist[4] = iseq[j-2]
+        ilist[5] = iseq[ip]
+        ilist[6] = iseq[jp]
 
-        eb = TINT12(ilist)
+        eb = TINT12(ilist,eb)
 
     elif ibul == 4:
 
@@ -178,7 +159,7 @@ def EBULGE(iseq,i,j,ip,jp,n):
         ilist[5] = iseq[j]
         ilist[6] = iseq[i]
 
-        eb = TINT12(ilist)
+        eb = TINT12(ilist,eb)
 
     elif ibul == 5:
 
@@ -194,12 +175,12 @@ def EBULGE(iseq,i,j,ip,jp,n):
         ilist[6] = iseq[ip]
         ilist[7] = iseq[jp]
 
-        eb = TINT22(ilist)
+        eb = TINT22(ilist,eb)
 
     elif ibul == 6:
 
-        # 5' (i) A X . . G (ip) 3'
-        # 3' (j) U Y . . C (jp) 5'
+        # 5' (i) A X .. G (ip) 3'
+        # 3' (j) U Y .. C (jp) 5'
 
         ilist[0] = iseq[i]
         ilist[1] = iseq[j]
@@ -210,31 +191,42 @@ def EBULGE(iseq,i,j,ip,jp,n):
 
         if ( imin == 1 and imax > 2 ):
 
-            ilist[2] = 1
-            ilist[3] = 1
+            ilist[2] = 0
+            ilist[3] = 0
 
-        #endif
+        eb = TSTACKI(ilist,eb)
 
-        eb = TSTACKI(ilist)
+        # 5' (i) A .. X G (ip) 3'
+        # 3' (j) U .. Y C (jp) 5'
+
+        ilist[0] = iseq[jp]
+        ilist[1] = iseq[ip]
+        ilist[2] = iseq[jp+1]
+        ilist[3] = iseq[ip-1]
+
+        #=== GAIL Rule ===#
+
+        if ( imin == 1 and imax > 2 ):
+
+            ilist[2] = 0
+            ilist[3] = 0
+
+        eb = TSTACKI(ilist,eb)
 
     else:
 
         raise Exception('ERROR: ibul out of range [0-6]')
 
-    #endif
-
     #=== PART 4 ---> Asymmetry Penalty ===#
 
     if ( ibul == 6 ):
 
-        k = min(4,n1,n2)
+        k = min(5,n1,n2)
 
-        x = float(na) * f[k]
+        x = float(na) * params.dG_asym[k]
 
-        x = min(x,3.0e0)
+        x = min(x,params.dG_maxasym)
 
         eb += x
-
-    #endif
 
     return eb

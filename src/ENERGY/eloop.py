@@ -25,8 +25,8 @@ Arguments:
                  in numerical code (A=1,C=2,G=3,U=4)
           IBSP - Array of dimension (N) containing the information
                  on base pairs in the RNA fold.
-                 IBSP(i) = j [i base pairs with j]
-                 IBSP(i) = 0 [i is single stranded]
+                 IBSP(i) = j  [i base pairs with j]
+                 IBSP(i) = -1 [i is single stranded]
              I - Nucleotide position of the 5' most nucleotide.
              J - Nucleotide position of the 3' most nucleotide.
              N - Number of nucleotides in the sequence.
@@ -43,21 +43,23 @@ Author(s): Alex Reis
 """
 
 import math
-from rnavar import em,eh,es,eaup,beta
+from rnavar import em,eh,es,beta
 
 def ELOOP(iseq,ibsp,i,j,n):
 
     # INTEGER
-    # i,j,n
-    # iseq(n),ibsp(n)
+    # i,j,n,nh,ns,tns,indx
+    # iseq(n),ibsp(n),nsl(n)
 
     # REAL
-    # x,c,ed,e3,e5,el
+    # x,c,ed,e3,e5,el,asym
 
     el = 0.0e0
 
     nh = 0
     ns = 0
+    ins = 0
+    lns = []
 
     c = 1.750e0 / float(beta)
 
@@ -76,16 +78,26 @@ def ELOOP(iseq,ibsp,i,j,n):
 
     while ( k <= ke ):
 
-        if ( ibsp[k] == 0 ): ns += 1
-        if ( ibsp[k] >  k ): nh += 1
+        # unpaired nt
+        if ( ibsp[k] == -1 ):
+            ins += 1
 
-        if ( ibsp[k] > k ) and ( iloop == 0 or k != ks ):
-            k = ibsp[k]
-        #endif
+        # new helix in loop
+        elif ( ibsp[k] >  k ):
+            lns[nh] = ins
+            ns += ins
+            ins = 0
+            nh += 1
+
+            # skip to closing bp of current nt
+            if ( iloop == 0 or k != ks ):
+                k = ibsp[k]
 
         k += 1
 
-    #endwhile
+    lns[0]  = ins # for-loop simplicity
+    lns[nh] = ins
+    ns += ins
 
     #=== Compute Loop Energy ===#
 
@@ -96,9 +108,8 @@ def ELOOP(iseq,ibsp,i,j,n):
     elif ( nh == 2 and iloop == 1 ):
 
         ip = i + 1
-        while ( ibsp[ip] == 0 ):
+        while ( ibsp[ip] == -1 ):
             ip += 1
-        #endwhile
 
         jp = ibsp[ip]
 
@@ -111,7 +122,7 @@ def ELOOP(iseq,ibsp,i,j,n):
         if ( iloop == 0 ):
 
             k = ks
-            ilast = 0
+            # ilast = 0 # not used
 
         elif ( iloop == 1 ):
 
@@ -121,62 +132,72 @@ def ELOOP(iseq,ibsp,i,j,n):
             k = ip + 1
             ilast = k
 
-            if ( k >= 1 and k <= n ) and ( ibsp[k] == 0 ):
+            if ( k >= 0 and k <= n-1 ) and ( ibsp[k] == -1 ):
                 e3 = EDANGLE(iseq,ip,jp,k,n)
-            #endif
 
-            if ( ns <= 6 ):
-                el = em + es * float(ns) + eh * float(nh)
+            if ( params.MBLmodel == 2 ):
+
+                # calculate average asymmetry of MBL
+                asym = 0.0e0
+                for indx in xrange(1,nh+1):
+                    asym += float( abs( lns[indx] - lns[indx-1] ) )
+                asym /= float(nh)
+                asym = min(2.0,asym)
+
+                el  = params.MBLinit[0]               # a
+                el += params.MBLinit[1] * float(asym) # b
+                el += params.MBLinit[2] * float(nh)   # c
+
+                if (nh == 3) and (ns < 2):
+                    el += params.MBLinit[4] # dG_strain
+
+            elif ( ns <= 6 ):
+                el  = params.MBLinit[0]               # a, (em)
+                el += params.MBLinit[1] * float(ns)   # b, (es)
+                el += params.MBLinit[2] * float(nh)   # c, (eh)
+
             else:
-                x = float(ns) / 6.0e0
-                el = em + es * 6.0e0 + eh * float(nh)
-                el = el + c * math.log(x)
-            #endif
+                el  = params.MBLinit[0]
+                el += params.MBLinit[1] * 6.0e0
+                x   = float(ns) / 6.0e0
+                el += c * math.log(x)
+                el += params.MBLinit[2] * float(nh)
 
-            while ( k <= ke ):
+        while ( k <= ke ):
 
-                if ( ibsp[k] != 0 ):
+            if ( ibsp[k] != -1 ):
 
-                    ip = k
-                    jp = ibsp[k]
+                ip = k
+                jp = ibsp[k]
 
-                    kp = ip - 1
+                kp = ip - 1
 
-                    e5 = 0.0e0
+                e5 = 0.0e0
 
-                    if ( kp >= 1 and kp <= n ) and ( ibsp[kp] == 0 ):
-                        e5 = EDANGLE(iseq,ip,jp,kp,n)
-                    #endif
+                if ( kp >= 0 and kp <= n-1 ) and ( ibsp[kp] == -1 ):
+                    e5 = EDANGLE(iseq,ip,jp,kp,n)
 
-                    if ( ilast == kp ):
-                        ed = min(e3,e5)
-                    else:
-                        ed = e3 + e5
-                    #endif
+                # pick 3' (H1) or 5' (H2) dangle if same nt
+                if ( ilast == kp ):
+                    ed = min(e3,e5)
+                else:
+                    ed = e3 + e5
 
-                    el = el + ed + eaup[iseq[ip]][iseq[jp]]
+                el = el + ed + params.dG_AUP[iseq[ip]][iseq[jp]]
 
-                    kp = jp + 1
-                    ilast = kp
+                kp = jp + 1
+                ilast = kp
 
-                    e3 = 0.0e0
+                e3 = 0.0e0
 
-                    if ( kp >= 1 and kp <= n ) and ( ibsp[kp] == 0 ):
-                        e3 = EDANGLE(iseq,ip,jp,kp,n)
-                    #endif
+                if ( kp >= 0 and kp <= n-1 ) and ( ibsp[kp] == -1 ):
+                    e3 = EDANGLE(iseq,ip,jp,kp,n)
 
-                    if ( k != ke ):
-                        k = ibsp[k]
-                    #endif
-                #endif
+                if ( k != ke ):
+                    k = ibsp[k]
+            k += 1
 
-                k += 1
+        if ( iloop == 0 ):
+            el += e3
 
-            #endwhile
-
-            if ( iloop == 0 ):
-                el += e3
-            #endif
-        #endif
-
-        return el
+    return el
